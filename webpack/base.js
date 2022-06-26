@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
+const webpack = require('webpack');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
@@ -72,6 +73,6 @@ module.exports = {
   devServer: {
     static: [{ directory: path.resolve('dist') }, { directory: path.resolve('public') }],
     compress: true,
-    port: 9000,
+    port: 3000,
   },
 };
