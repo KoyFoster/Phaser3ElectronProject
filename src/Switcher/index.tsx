@@ -57,18 +57,12 @@ class Switcher extends Phaser.Scene {
     });
   }
 
-  hitMobs(
-    mob: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
-    punch: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
-  ) {
-    // get direction
-    let vector = new Vector2(
-      mob.body.position.x - punch.body.position.x,
-      mob.body.position.y - punch.body.position.y
-    );
-    vector.normalize();
-    // force back mobs
-    mob.setVelocity(vector.x * 1000, vector.y * 1000);
+  followPlayer() {
+    // chase player
+    this.mobs.children.iterate((mob) => {
+      //if(this.mobs.active)
+      this.physics.accelerateToObject(mob, this.player, 120);
+    });
   }
 
   create() {
@@ -88,13 +82,12 @@ class Switcher extends Phaser.Scene {
       fill: "#000000",
     });
 
-    // player
     this.player = this.physics.add.sprite(width * 0.5, height * 0.5, "dude");
-
-    this.player.setBounce(0.2);
-    this.player.setCollideWorldBounds(true);
+    this.cameras.main.startFollow(this.player);
 
     this.punch = this.physics.add.sprite(width * 0.5, height * 0.5, "hurbox");
+    this.punch.debugShowBody = true;
+    this.punch.setOrigin(0.5, 0);
     this.punch.disableBody(true, true);
 
     // Spritesheep frame events
@@ -104,7 +97,6 @@ class Switcher extends Phaser.Scene {
       frameRate: 10,
       repeat: -1,
     });
-
     this.anims.create({
       key: "turn",
       frames: [{ key: "dude", frame: 4 }],
@@ -120,7 +112,6 @@ class Switcher extends Phaser.Scene {
       frames: [{ key: "dude", frame: 5 }],
       frameRate: 20,
     });
-
     this.anims.create({
       key: "right",
       frames: this.anims.generateFrameNumbers("dude", { start: 6, end: 9 }),
@@ -137,10 +128,30 @@ class Switcher extends Phaser.Scene {
     this.physics.add.collider(this.mobs, this.mobs);
     // this.physics.add.collider(this.mobs, this.player);
 
-    this.physics.add.collider(this.mobs, this.punch, this.hitMobs);
+    this.physics.add.collider(
+      this.mobs,
+      this.punch,
+      this.hitMobs as ArcadePhysicsCallback
+    );
   }
 
-  update() {
+  hitMobs(
+    punch: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+    mob: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
+  ) {
+    // get direction
+    let vector = new Vector2(
+      mob.body.position.x - punch.body.position.x,
+      mob.body.position.y - punch.body.position.y
+    );
+    vector.normalize();
+    // force back mobs
+    mob.setAcceleration(vector.x * 1000, vector.y * 1000);
+
+    // console.log('disable:', true)
+  }
+
+  inputs() {
     if (this.cursors.up.isDown || this.keys.W.isDown) {
       this.player.setVelocityY(-160);
       this.player.anims.play("up", true);
@@ -164,16 +175,14 @@ class Switcher extends Phaser.Scene {
     // check if player is moving
     if (!this.player.body.velocity.x && !this.player.body.velocity.y) {
       this.player.anims.play("turn", true);
-    } else {
-      console.log("moves");
-      // chase player
-      this.mobs.children.iterate((mob) => {
-        this.physics.moveToObject(mob, this.player, 120);
-      });
     }
 
     // on left click
     if (this.input.mousePointer.leftButtonDown()) {
+      // rotate to mouse position
+      // const angle = PMath.Angle.BetweenPoints(this.input.mousePointer, this.punch.body.position);
+      // this.punch.setRotation(angle + PMath.PI2*0.25);
+      // enable
       this.punch.enableBody(
         true,
         this.player.body.position.x,
@@ -184,6 +193,12 @@ class Switcher extends Phaser.Scene {
     } else {
       this.punch.disableBody(true, true);
     }
+  }
+
+  update() {
+    this.inputs();
+
+    this.followPlayer();
   }
 }
 
@@ -198,7 +213,7 @@ export const config = {
     default: "arcade",
     arcade: {
       // gravity: { y: 300 },
-      debug: false,
+      debug: true,
     },
   },
 };
