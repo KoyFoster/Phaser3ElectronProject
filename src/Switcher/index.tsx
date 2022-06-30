@@ -1,6 +1,9 @@
 import Phaser, { Math as PMath } from "phaser";
 const { Vector2 } = PMath;
 import ground from "../assets/platform.png";
+import boundary from "../assets/boundary.png";
+import tile0 from "../assets/tile0.png";
+import pixel from "../assets/pixel.png";
 import star from "../assets/star.png";
 import bomb from "../assets/bomb.png";
 import dude from "../assets/dude.png";
@@ -33,6 +36,7 @@ function spawnAroundFrame(
 }
 
 class Switcher extends Phaser.Scene {
+  boundaries: Phaser.Physics.Arcade.StaticGroup;
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   punch: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   mobs: Phaser.Physics.Arcade.Group;
@@ -49,7 +53,11 @@ class Switcher extends Phaser.Scene {
 
   preload() {
     // load assets
+    this.load.image("pixel", pixel);
     this.load.image("bomb", bomb);
+    this.load.image("ground", ground);
+    this.load.image("boundary", boundary);
+    this.load.image("tile0", tile0);
     this.load.image("hurbox", hurbox);
     this.load.spritesheet("dude", dude, {
       frameWidth: 32,
@@ -66,6 +74,15 @@ class Switcher extends Phaser.Scene {
   }
 
   create() {
+    // boundaries
+    this.boundaries = this.physics.add.staticGroup();
+    const tile = this.add.tileSprite(width*0.5, height*0.5,width, height, "tile0")
+    // frame
+    this.boundaries.create(width*0.5, 0, "pixel").setScale(width, 1).refreshBody(); // Top
+    this.boundaries.create(width*0.5, height, "pixel").setScale(width, 1).refreshBody(); // Bottom
+    this.boundaries.create(0, height*0.5, "pixel").setScale(1, height).refreshBody(); // Left
+    this.boundaries.create(width, height*0.5, "pixel").setScale(1, height).refreshBody(); // Right
+
     // listeners
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys("W,A,S,D");
@@ -125,8 +142,8 @@ class Switcher extends Phaser.Scene {
     this.mobs.create(666, 666, "bomb");
 
     // collisions
-    this.physics.add.collider(this.mobs, this.mobs);
-    // this.physics.add.collider(this.mobs, this.player);
+    this.physics.add.collider(this.mobs, this.boundaries);
+    this.physics.add.collider(this.player, this.boundaries);
 
     this.physics.add.collider(
       this.mobs,
