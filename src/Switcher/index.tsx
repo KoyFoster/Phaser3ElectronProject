@@ -8,6 +8,7 @@ import star from "../assets/star.png";
 import bomb from "../assets/bomb.png";
 import dude from "../assets/dude.png";
 import hurbox from "../assets/hurbox.png";
+import upswing from "../assets/upswing.png";
 
 import logoImg from "../assets/logo.png";
 import sky from "../assets/sky.png";
@@ -38,7 +39,9 @@ function spawnAroundFrame(
 class Switcher extends Phaser.Scene {
   boundaries: Phaser.Physics.Arcade.StaticGroup;
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-  punch: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  punch: Phaser.Types.Physics.Arcade.SpriteWithStaticBody;
+  timer: Phaser.Time.TimerEvent;
+  swinging: boolean;
   mobs: Phaser.Physics.Arcade.Group;
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   keys: any;
@@ -53,6 +56,7 @@ class Switcher extends Phaser.Scene {
 
   preload() {
     // load assets
+    this.load.image("upswing", upswing);
     this.load.image("pixel", pixel);
     this.load.image("bomb", bomb);
     this.load.image("ground", ground);
@@ -87,6 +91,20 @@ class Switcher extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys("W,A,S,D");
 
+    // timer
+    this.swinging = false;
+    this.timer = this.time.addEvent({
+      delay: 500,                // ms
+      callback: () => {},
+      args: [],
+      callbackScope: this,
+      loop: false,
+      repeat: 0,
+      startAt: 0,
+      timeScale: 1,
+      paused: false
+  });
+
     // bg
 
     // platforms
@@ -102,9 +120,9 @@ class Switcher extends Phaser.Scene {
     this.player = this.physics.add.sprite(width * 0.5, height * 0.5, "dude");
     this.cameras.main.startFollow(this.player);
 
-    this.punch = this.physics.add.sprite(width * 0.5, height * 0.5, "hurbox");
+    this.punch = this.physics.add.staticSprite(width * 0.5, height * 0.5, "upswing");
     this.punch.debugShowBody = true;
-    this.punch.setOrigin(0.5, 0);
+    this.punch.setOrigin(0.25, 1);
     this.punch.disableBody(true, true);
 
     // Spritesheep frame events
@@ -168,6 +186,30 @@ class Switcher extends Phaser.Scene {
     // console.log('disable:', true)
   }
 
+  swing(end = false)
+  {
+    // rotate to mouse position
+    // const angle = PMath.Angle.BetweenPoints(this.input.mousePointer, this.punch.body.position);
+    // this.punch.setRotation(angle + PMath.PI2*0.25);
+    // enable
+    if(!end && !this.swinging)
+    {
+      this.swinging = true;
+      this.punch.enableBody(
+        true,
+        this.player.body.position.x,
+        this.player.body.position.y,
+        true,
+        true
+      );
+    }
+    else
+    {
+      this.swinging = false;
+      this.punch.disableBody(true, true);
+    }
+  }
+
   inputs() {
     if (this.cursors.up.isDown || this.keys.W.isDown) {
       this.player.setVelocityY(-160);
@@ -196,19 +238,18 @@ class Switcher extends Phaser.Scene {
 
     // on left click
     if (this.input.mousePointer.leftButtonDown()) {
-      // rotate to mouse position
-      // const angle = PMath.Angle.BetweenPoints(this.input.mousePointer, this.punch.body.position);
-      // this.punch.setRotation(angle + PMath.PI2*0.25);
-      // enable
-      this.punch.enableBody(
-        true,
-        this.player.body.position.x,
-        this.player.body.position.y,
-        true,
-        true
-      );
-    } else {
-      this.punch.disableBody(true, true);
+      this.swing(false);
+      this.timer.reset({
+        delay: 200,                // ms
+        callback: () => {this.swing(true)},
+        args: [],
+        callbackScope: this,
+        loop: false,
+        repeat: 0,
+        startAt: 0,
+        timeScale: 1,
+        paused: false
+    });
     }
   }
 
