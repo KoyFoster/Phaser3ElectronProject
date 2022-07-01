@@ -2,9 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
-import { config } from "./Switcher";
-
-const game = new Phaser.Game(config);
+import "./Switcher";
 
 // Main app
 const root = ReactDOM.createRoot(

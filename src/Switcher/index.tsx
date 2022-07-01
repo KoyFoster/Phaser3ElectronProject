@@ -12,6 +12,8 @@ import upswing from "../assets/upswing.png";
 
 import logoImg from "../assets/logo.png";
 import sky from "../assets/sky.png";
+import { StartupScene } from "./scenes/StartupScene";
+import { GameScene } from "./scenes/GameScene";
 
 const width = 1920 * 0.75;
 const height = 1080 * 0.75;
@@ -266,7 +268,6 @@ export const config = {
   parent: "phaser-example",
   width: width,
   height: height,
-  scene: Switcher,
   physics: {
     default: "arcade",
     arcade: {
@@ -274,4 +275,7 @@ export const config = {
       debug: true,
     },
   },
+  scene: [GameScene, StartupScene],
 };
+
+export default new Phaser.Game(config);
