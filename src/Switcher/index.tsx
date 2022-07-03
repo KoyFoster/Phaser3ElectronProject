@@ -14,6 +14,7 @@ import logoImg from "../assets/logo.png";
 import sky from "../assets/sky.png";
 import { StartupScene } from "./scenes/StartupScene";
 import { GameScene } from "./scenes/GameScene";
+import AttackScene from "./scenes/AttackScene";
 
 const width = 1920 * 0.75;
 const height = 1080 * 0.75;
@@ -39,17 +40,17 @@ function spawnAroundFrame(
 }
 
 class Switcher extends Phaser.Scene {
-  boundaries: Phaser.Physics.Arcade.StaticGroup;
-  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-  punch: Phaser.Types.Physics.Arcade.SpriteWithStaticBody;
-  timer: Phaser.Time.TimerEvent;
-  swinging: boolean;
-  mobs: Phaser.Physics.Arcade.Group;
-  cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+  boundaries!: Phaser.Physics.Arcade.StaticGroup;
+  player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  punch!: Phaser.Types.Physics.Arcade.SpriteWithStaticBody;
+  timer!: Phaser.Time.TimerEvent;
+  swinging!: boolean;
+  mobs!: Phaser.Physics.Arcade.Group;
+  cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   keys: any;
 
   score = 0;
-  scoreText: Phaser.GameObjects.Text;
+  scoreText!: Phaser.GameObjects.Text;
   gameOver = false;
 
   constructor() {
@@ -275,7 +276,7 @@ export const config = {
       debug: true,
     },
   },
-  scene: [GameScene, StartupScene],
+  scene: [AttackScene, GameScene, StartupScene],
 };
 
 export default new Phaser.Game(config);

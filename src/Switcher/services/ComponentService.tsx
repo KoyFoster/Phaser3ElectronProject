@@ -5,7 +5,7 @@ export type Constructor<T extends {} = {}> = new (...args: any[]) => T
 
 export interface IComponent
 {
-    init(go: Phaser.GameObjects.GameObject)
+    init: (go: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform, components: IComponentService) => void
 
     awake?: () => void
     start?: () => void
@@ -13,7 +13,7 @@ export interface IComponent
     destroy?: () => void
 }
 
-export default class ComponentService
+export default class IComponentService
 {
     private componentsByGameObject = new Map<string, IComponent[]>()
     private queueForStart: IComponent[] = []
