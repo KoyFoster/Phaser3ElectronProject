@@ -1,72 +1,111 @@
-interface StateConfig {
-  name?: string;
-  onEnter?: () => void;
-  onUpdate?: (dt: number) => void;
-  onExit?: () => void;
+interface StateConfig
+{
+	name: string
+	onEnter?: () => void
+	onUpdate?: (dt: number) => void
+	onExit?: () => void
 }
 
-export default class StateMachine {
-  private context?: any;
-  private name: string;
-  private states = new Map<string, StateConfig>();
-  private currentState?: StateConfig;
-  private isSwitchingState = false;
-  private stateQueue: string[] = [];
+let idCount = 0
 
-  constructor(context?: any, name?: string) {
-    this.context = context;
-    this.name = name ?? "fsm";
-  }
+export default class StateMachine
+{
+	private id = (++idCount).toString()
+	private context?: object
+	private states = new Map<string, StateConfig>()
 
-  isCurrentState(name: string) {
-    if (!this.currentState) return false;
-    if (this.currentState.name !== name) return false;
-    return true;
-  }
+	private previousState?: StateConfig
+	private currentState?: StateConfig
+	private isChangingState = false
+	private changeStateQueue: string[] = []
 
-  addState(name: string, config?: StateConfig) {
-    this.states.set(name, {
-      name,
-      onEnter: config?.onEnter?.bind(this.context),
-      onUpdate: config?.onUpdate?.bind(this.context),
-      onExit: config?.onExit?.bind(this.context),
-    });
+	get previousStateName()
+	{
+		if (!this.previousState)
+		{
+			return ''
+		}
 
-    return this;
-  }
+		return this.previousState.name
+	}
 
-  setState(name: string) {
-    if (!this.states.has(name)) return;
+	constructor(context?: object, id?: string)
+	{
+		this.id = id ?? this.id
+		this.context = context
+	}
 
-    if (this.isSwitchingState) {
-      this.stateQueue.push(name);
-      return;
-    }
-    this.isSwitchingState = true;
+	isCurrentState(name: string)
+	{
+		if (!this.currentState)
+		{
+			return false
+		}
 
-    // debug
-    console.log(`[StateMachine (${this.name})] changing from ${this.currentState} to ${name}`);
+		return this.currentState.name === name
+	}
 
-    if (this.currentState && this.currentState.onExit)
-      this.currentState.onExit();
+	addState(name: string, config?: { onEnter?: () => void, onUpdate?: (dt: number) => void, onExit?: () => void })
+	{
+		const context = this.context
 
-    this.currentState = this.states.get(name);
-    if (this.currentState?.onEnter) this.currentState?.onEnter();
+		this.states.set(name, {
+			name,
+			onEnter: config?.onEnter?.bind(context),
+			onUpdate: config?.onUpdate?.bind(context),
+			onExit: config?.onExit?.bind(context)
+		})
 
-    this.isSwitchingState = false;
-    return this;
-  }
+		return this
+	}
 
-  update(dt: number) {
-    if(this.stateQueue.length)
-    {
-        const name = this.stateQueue.shift()!;
-        this.setState(name);
-        return;
-    }
+	setState(name: string)
+	{
+		if (!this.states.has(name))
+		{
+			return
+		}
 
-    if (!this.currentState) return;
+		if (this.isCurrentState(name))
+		{
+			return
+		}
 
-    if (this.currentState.onUpdate) this.currentState.onUpdate(dt);
-  }
+		if (this.isChangingState)
+		{
+			this.changeStateQueue.push(name)
+			return
+		}
+
+		this.isChangingState = true
+
+		if (this.currentState && this.currentState.onExit)
+		{
+			this.currentState.onExit()
+		}
+
+		this.previousState = this.currentState
+		this.currentState = this.states.get(name)!
+
+		if (this.currentState.onEnter)
+		{
+			this.currentState.onEnter()
+		}
+
+		this.isChangingState = false
+	}
+
+	update(dt: number)
+	{
+		if (this.changeStateQueue.length > 0)
+		{
+			this.setState(this.changeStateQueue.shift()!)
+			return
+		}
+
+		if (this.currentState && this.currentState.onUpdate)
+		{
+			this.currentState.onUpdate(dt)
+		}
+	}
 }
