@@ -1,20 +1,12 @@
 import Phaser, { Math as PMath } from "phaser";
 const { Vector2 } = PMath;
-import ground from "../assets/platform.png";
-import boundary from "../assets/boundary.png";
-import tile0 from "../assets/tile0.png";
-import pixel from "../assets/pixel.png";
-import star from "../assets/star.png";
-import bomb from "../assets/bomb.png";
-import dude from "../assets/dude.png";
-import hurbox from "../assets/hurbox.png";
-import upswing from "../assets/upswing.png";
-
-import logoImg from "../assets/logo.png";
-import sky from "../assets/sky.png";
 import { StartupScene } from "./scenes/StartupScene";
 import { GameScene } from "./scenes/GameScene";
-import AttackScene from "./scenes/AttackScene";
+import IComponentService from "./services/ComponentService";
+import Spawner from "./components/Spawner";
+import Preloader from "./scenes/preloader";
+import { Attack } from "./components/Attack";
+import { Damage } from "./components/Damage";
 
 const width = 1920 * 0.75;
 const height = 1080 * 0.75;
@@ -23,7 +15,8 @@ function spawnAroundFrame(
   group: Phaser.Physics.Arcade.Group,
   sprite: string,
   num: number,
-  padding = 500
+  padding = 500,
+  components: IComponentService
 ) {
   // spawn right outside of view
   for (let i = 0; i < num; i += 1) {
@@ -35,11 +28,15 @@ function spawnAroundFrame(
       x > y ? (i ? height + padding : 0) : y - padding,
       sprite
     );
+    const comp = new Damage()
+    components.addComponent(mob, comp);
+    components.removeComponent(mob, comp);
     mob.setFriction(120);
   }
 }
 
 class Switcher extends Phaser.Scene {
+  private components!: IComponentService;
   boundaries!: Phaser.Physics.Arcade.StaticGroup;
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   punch!: Phaser.Types.Physics.Arcade.SpriteWithStaticBody;
@@ -54,22 +51,10 @@ class Switcher extends Phaser.Scene {
   gameOver = false;
 
   constructor() {
-    super("");
+    super("Switcher");
   }
 
   preload() {
-    // load assets
-    this.load.image("upswing", upswing);
-    this.load.image("pixel", pixel);
-    this.load.image("bomb", bomb);
-    this.load.image("ground", ground);
-    this.load.image("boundary", boundary);
-    this.load.image("tile0", tile0);
-    this.load.image("hurbox", hurbox);
-    this.load.spritesheet("dude", dude, {
-      frameWidth: 32,
-      frameHeight: 48,
-    });
   }
 
   followPlayer() {
@@ -80,15 +65,40 @@ class Switcher extends Phaser.Scene {
     });
   }
 
+  init() {
+    this.components = new IComponentService();
+    this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.components.destroy();
+    });
+  }
+
   create() {
     // boundaries
     this.boundaries = this.physics.add.staticGroup();
-    const tile = this.add.tileSprite(width*0.5, height*0.5,width, height, "tile0")
+    const tile = this.add.tileSprite(
+      width * 0.5,
+      height * 0.5,
+      width,
+      height,
+      "tile0"
+    );
     // frame
-    this.boundaries.create(width*0.5, 0, "pixel").setScale(width, 1).refreshBody(); // Top
-    this.boundaries.create(width*0.5, height, "pixel").setScale(width, 1).refreshBody(); // Bottom
-    this.boundaries.create(0, height*0.5, "pixel").setScale(1, height).refreshBody(); // Left
-    this.boundaries.create(width, height*0.5, "pixel").setScale(1, height).refreshBody(); // Right
+    this.boundaries
+      .create(width * 0.5, 0, "pixel")
+      .setScale(width, 1)
+      .refreshBody(); // Top
+    this.boundaries
+      .create(width * 0.5, height, "pixel")
+      .setScale(width, 1)
+      .refreshBody(); // Bottom
+    this.boundaries
+      .create(0, height * 0.5, "pixel")
+      .setScale(1, height)
+      .refreshBody(); // Left
+    this.boundaries
+      .create(width, height * 0.5, "pixel")
+      .setScale(1, height)
+      .refreshBody(); // Right
 
     // listeners
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -97,7 +107,7 @@ class Switcher extends Phaser.Scene {
     // timer
     this.swinging = false;
     this.timer = this.time.addEvent({
-      delay: 500,                // ms
+      delay: 500, // ms
       callback: () => {},
       args: [],
       callbackScope: this,
@@ -105,8 +115,8 @@ class Switcher extends Phaser.Scene {
       repeat: 0,
       startAt: 0,
       timeScale: 1,
-      paused: false
-  });
+      paused: false,
+    });
 
     // bg
 
@@ -121,12 +131,8 @@ class Switcher extends Phaser.Scene {
     });
 
     this.player = this.physics.add.sprite(width * 0.5, height * 0.5, "dude");
-    this.cameras.main.startFollow(this.player);
 
-    this.punch = this.physics.add.staticSprite(width * 0.5, height * 0.5, "upswing");
-    this.punch.debugShowBody = true;
-    this.punch.setOrigin(0.25, 1);
-    this.punch.disableBody(true, true);
+    this.cameras.main.startFollow(this.player);
 
     // Spritesheep frame events
     this.anims.create({
@@ -159,62 +165,28 @@ class Switcher extends Phaser.Scene {
 
     // mobs
     this.mobs = this.physics.add.group();
-    spawnAroundFrame(this.mobs, "bomb", 50);
+    spawnAroundFrame(this.mobs, "bomb", 50, 0, this.components);
     this.mobs.create(666, 666, "bomb");
+
+
+
+		// const bombsLayer = this.add.layer()
+    // this.components.addComponent(this.player, new Spawner(undefined, this.cursors, bombsLayer));
+    // add attack to player
+    const newAttack = new Attack();
+    this.components.addComponent(this.player, newAttack);
+    newAttack.setParent(this.player);
+    newAttack.setMobs(this.mobs as Phaser.Physics.Arcade.Group);
+    newAttack.setInput(() => { return this.cursors.space.isDown });
 
     // collisions
     this.physics.add.collider(this.mobs, this.boundaries);
     this.physics.add.collider(this.player, this.boundaries);
-
-    this.physics.add.collider(
-      this.mobs,
-      this.punch,
-      this.hitMobs as ArcadePhysicsCallback
-    );
-  }
-
-  hitMobs(
-    punch: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
-    mob: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
-  ) {
-    // get direction
-    let vector = new Vector2(
-      mob.body.position.x - punch.body.position.x,
-      mob.body.position.y - punch.body.position.y
-    );
-    vector.normalize();
-    // force back mobs
-    mob.setAcceleration(vector.x * 1000, vector.y * 1000);
-
-    // console.log('disable:', true)
-  }
-
-  swing(end = false)
-  {
-    // rotate to mouse position
-    // const angle = PMath.Angle.BetweenPoints(this.input.mousePointer, this.punch.body.position);
-    // this.punch.setRotation(angle + PMath.PI2*0.25);
-    // enable
-    if(!end && !this.swinging)
-    {
-      this.swinging = true;
-      this.punch.enableBody(
-        true,
-        this.player.body.position.x,
-        this.player.body.position.y,
-        true,
-        true
-      );
-    }
-    else
-    {
-      this.swinging = false;
-      this.punch.disableBody(true, true);
-    }
   }
 
   inputs() {
     if (this.cursors.up.isDown || this.keys.W.isDown) {
+      console.log('components:', this.components)
       this.player.setVelocityY(-160);
       this.player.anims.play("up", true);
     } else if (this.cursors.down.isDown || this.keys.S.isDown) {
@@ -238,28 +210,14 @@ class Switcher extends Phaser.Scene {
     if (!this.player.body.velocity.x && !this.player.body.velocity.y) {
       this.player.anims.play("turn", true);
     }
-
-    // on left click
-    if (this.input.mousePointer.leftButtonDown()) {
-      this.swing(false);
-      this.timer.reset({
-        delay: 200,                // ms
-        callback: () => {this.swing(true)},
-        args: [],
-        callbackScope: this,
-        loop: false,
-        repeat: 0,
-        startAt: 0,
-        timeScale: 1,
-        paused: false
-    });
-    }
   }
 
-  update() {
+  update(t: number, dt: number) {
     this.inputs();
 
     this.followPlayer();
+
+		this.components.update(dt)
   }
 }
 
@@ -276,7 +234,7 @@ export const config = {
       debug: true,
     },
   },
-  scene: [AttackScene, GameScene, StartupScene],
+  scene: [Preloader, Switcher, StartupScene, GameScene],
 };
 
 export default new Phaser.Game(config);

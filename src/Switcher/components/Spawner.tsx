@@ -1,66 +1,83 @@
-import Phaser from 'phaser';
-import IComponentService, { IComponent } from '../services/ComponentService';
-import StateMachine from '../statemachine/StateMachine';
+import Phaser from 'phaser'
+import StateMachine from '../statemachine/StateMachine'
+import IComponentService, { IComponent } from '../services/ComponentService'
+// import Countdown from './Countdown'
+// import Explosion from './Explosion'
 
-export default class Spawner implements IComponent {
-    private gameObject!: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform;
-    private stateMachine!: StateMachine;
-    private components!: IComponentService;
-    private readonly cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+export default class Spawner implements IComponent
+{
+	private readonly colliders?: Phaser.Physics.Arcade.Group
+	private readonly cursors: Phaser.Types.Input.Keyboard.CursorKeys
+	private readonly layer?: Phaser.GameObjects.Layer
 
-    constructor(cursors: Phaser.Types.Input.Keyboard.CursorKeys)
-    {
-        this.cursors = cursors;
-        this.stateMachine = new StateMachine(this, 'bomb-spawner');
-        this.stateMachine.addState('idle',
-        {
-            onUpdate: this.handleIdleUpdate
-        }).addState('spawn',
-        {
-            onEnter: this.handleSpawnEnter,
-            onUpdate: this.handleSpawnUpdate
-        }).setState('idle');
-    }
+	private gameObject!: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform
+	private components!: IComponentService
 
-    init(go: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform, components: IComponentService)
-    {
-        this.gameObject = go;
-        this.components = components;
-    }
+	// private selectionCursor?: SelectionCursor
 
-    start()
-    {
-        // this.selectCursor = this.components.findComponent(this.gameObject, this.selectionCursor);
-    }
+	private stateMachine: StateMachine
 
-    update(dt: number)
-    {
-        this.stateMachine.update(dt)
-    }
+	constructor(colliders: Phaser.Physics.Arcade.Group | undefined, cursors: Phaser.Types.Input.Keyboard.CursorKeys, layer?: Phaser.GameObjects.Layer)
+	{
+        if(colliders)
+		this.colliders = colliders
+		this.cursors = cursors
+		this.layer = layer
 
-    private handleIdleUpdate()
-    {
-        if(this.cursors.space.isDown)
-        {
-            console.log('space.isDown');
-            this.stateMachine.setState('spawn')
-        }
-    }
+		this.stateMachine = new StateMachine(this, 'star-spawner')
+		this.stateMachine
+			.addState('idle', {
+				onUpdate: this.handleIdleUpdate
+			})
+			.addState('spawn', {
+				onEnter: this.handleSpawnEnter,
+				onUpdate: this.handleSpawnUpdate
+			})
+			.setState('idle')
+	}
 
-    private handleSpawnEnter()
-    {
-        const {scene} = this.gameObject
+	init(go: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform, components: IComponentService)
+	{
+		this.gameObject = go
+		this.components = components
+	}
 
-        //const position = this.selectionCursor ? this.selectionCursor.selectorPOsition : {}
-        const position = {x: this.gameObject.x, y: this.gameObject.y};
+	start()
+	{
+		// this.selectionCursor = this.components.findComponent(this.gameObject, SelectionCursor)
+	}
 
+	update(dt: number)
+	{
+		this.stateMachine.update(dt)
+	}
 
-        scene.add.image(position.x, position.y, 'bomb')
-    }
+	private handleIdleUpdate()
+	{
+		if (this.cursors.space.isDown)
+		{
+			this.stateMachine.setState('spawn')
+		}
+	}
 
-    private handleSpawnUpdate()
-    {
-        if(this.cursors.space.isUp)
-        this.stateMachine.setState('idle');
-    }
+	private handleSpawnEnter()
+	{
+		const { scene } = this.gameObject
+
+		const position = { x: this.gameObject.x, y: this.gameObject.y }
+
+		const star = scene.add.image(position.x, position.y, 'star')
+
+		// this.components.addComponent(star, new Countdown(3))
+		// this.components.addComponent(star, new Explosion(this.colliders))
+
+	}
+
+	private handleSpawnUpdate()
+	{
+		if (this.cursors.space.isUp)
+		{
+			this.stateMachine.setState('idle')
+		}
+	}
 }

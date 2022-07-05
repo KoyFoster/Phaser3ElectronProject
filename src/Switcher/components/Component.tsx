@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { IComponent } from '../services/IComponentService';
+import { IComponent } from '../services/ComponentService';
 
 export class PhaserComponent implements IComponent
 {

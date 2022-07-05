@@ -38,7 +38,7 @@ export class GameScene extends Phaser.Scene {
     const bomb = this.add.image(500, 500, "bomb");
     this.entities.push(bomb);
     this.components.addComponent(bomb, new PhaserComponent());
-    this.components.addComponent(bomb, new Spawner(this.cursors));
+    this.components.addComponent(bomb, new Spawner(this.cursors, this.cursors));
   }
 
   update(t: number, dt: number) {
