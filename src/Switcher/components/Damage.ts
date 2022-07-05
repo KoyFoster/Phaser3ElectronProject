@@ -71,6 +71,7 @@ export class Damage implements IComponent {
 
   destroy() {
     console.log("destroy");
+    this.hpText.destroy();
   }
 
   private handleClick() {}
