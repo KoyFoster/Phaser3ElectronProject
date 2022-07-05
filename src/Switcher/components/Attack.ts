@@ -8,17 +8,25 @@ export class Attack implements IComponent {
   private cdTimer = 0 as number;
   private linger = 250 as number;
   private lTimer = 0 as number;
+
   private components!: IComponentService;
   private gameObject!: Phaser.GameObjects.GameObject &
     Phaser.GameObjects.Components.Transform;
+  private stateMachine!: StateMachine;
+
+  private parent?: Phaser.GameObjects.Image;
   private hitbox!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+  private mobs?: Phaser.GameObjects.Image[] | Phaser.Physics.Arcade.Group;
+
   private cdElipse!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
   private lElipse!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-  private stateMachine!: StateMachine;
-  private mobs?: Phaser.GameObjects.Image[] | Phaser.Physics.Arcade.Group;
-  private parent?: Phaser.GameObjects.Image;
+
   // input bind
   private input?: () => boolean;
+
+  // assets
+  private sprite?: string;
+  private fx?: string;
 
   // this may be creating a new instance of components
   init(
@@ -31,28 +39,17 @@ export class Attack implements IComponent {
     this.create();
   }
 
-  constructor() {}
+  constructor(sprite?: string, fx?: string) {
+    this.sprite = sprite;
+    this.fx = fx;
+  }
 
   create() {
     const { scene } = this.gameObject;
-    this.hitbox = scene.add.rectangle(
-      0,
-      0,
-      32,
-      64,
-      0xffffff,
-      0.5
-    ) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-    this.cdElipse = scene.add.rectangle(
-        0,
-        0,
-        32,
-        64,
-        0xffffff,
-        0.5
-    ) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-    this.lElipse = scene.add
-      .rectangle(
+    if (this.sprite) {
+      this.hitbox = scene.physics.add.image(0, 0, this.sprite);
+    } else {
+      this.hitbox = scene.add.rectangle(
         0,
         0,
         32,
@@ -60,8 +57,29 @@ export class Attack implements IComponent {
         0xffffff,
         0.5
       ) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-    scene.physics.add.existing(this.hitbox);
-    this.hitbox.body.enable = false;
+
+      scene.physics.add.existing(this.hitbox);
+      this.hitbox.body.enable = false;
+    }
+    this.hitbox.visible = false;
+
+    this.cdElipse = scene.add.rectangle(
+      0,
+      0,
+      32,
+      64,
+      0xffffff,
+      0.5
+    ) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+
+    this.lElipse = scene.add.rectangle(
+      0,
+      0,
+      32,
+      64,
+      0xffffff,
+      0.5
+    ) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
     scene.physics.world.remove(this.hitbox.body);
 
     this.stateMachine = new StateMachine(this, "generic-attack");
@@ -111,7 +129,9 @@ export class Attack implements IComponent {
     if (!this.parent) return;
 
     this.hitbox.body.enable = true;
+    this.hitbox.visible = true;
     this.gameObject.scene.physics.world.add(this.hitbox.body);
+    if (this.fx) this.gameObject.scene.sound.play(this.fx);
   }
 
   attackUpdate(dt: number) {
@@ -133,6 +153,7 @@ export class Attack implements IComponent {
     if (this.lTimer >= this.linger) {
       this.lTimer = 0;
       this.hitbox.body.enable = false;
+      this.hitbox.visible = false;
       const { scene } = this.gameObject;
       scene.physics.world.remove(this.hitbox.body);
       this.stateMachine.setState("on-cooldown");

@@ -12,6 +12,11 @@ import upswing from "../../assets/upswing.png";
 import logoImg from "../../assets/logo.png";
 import sky from "../../assets/sky.png";
 
+import swipe from "../../assets/audio/fx/swipe.mp3";
+import punch from "../../assets/audio/fx/punch.mp3";
+import slap from "../../assets/audio/fx/slap.mp3";
+
+
 export default class Preloader extends Phaser.Scene
 {
 	constructor()
@@ -21,7 +26,12 @@ export default class Preloader extends Phaser.Scene
 
 	preload()
 	{
-		// load assets
+		// load image assets
+		this.load.audio('swipe', swipe);
+		this.load.audio('punch', punch);
+		this.load.audio('slap', slap);
+
+		// load image assets
 		this.load.image("upswing", upswing);
 		this.load.image("pixel", pixel);
 		this.load.image("star", star);

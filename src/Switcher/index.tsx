@@ -146,7 +146,7 @@ class Switcher extends Phaser.Scene {
 		// const bombsLayer = this.add.layer()
     // this.components.addComponent(this.player, new Spawner(undefined, this.cursors, bombsLayer));
     // add attack to player
-    const newAttack = new Attack();
+    const newAttack = new Attack('upswing', 'swipe');
     this.components.addComponent(this.player, newAttack);
     newAttack.setParent(this.player);
     newAttack.setMobs(this.mobs as Phaser.Physics.Arcade.Group);
