@@ -30,7 +30,7 @@ function spawnAroundFrame(
     );
     const comp = new Damage()
     components.addComponent(mob, comp);
-    components.removeComponent(mob, comp);
+    // components.removeComponent(mob, comp);
     mob.setFriction(120);
   }
 }
@@ -39,9 +39,6 @@ class Switcher extends Phaser.Scene {
   private components!: IComponentService;
   boundaries!: Phaser.Physics.Arcade.StaticGroup;
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-  punch!: Phaser.Types.Physics.Arcade.SpriteWithStaticBody;
-  timer!: Phaser.Time.TimerEvent;
-  swinging!: boolean;
   mobs!: Phaser.Physics.Arcade.Group;
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   keys: any;
@@ -60,7 +57,6 @@ class Switcher extends Phaser.Scene {
   followPlayer() {
     // chase player
     this.mobs.children.iterate((mob) => {
-      //if(this.mobs.active)
       this.physics.accelerateToObject(mob, this.player, 120);
     });
   }
@@ -104,26 +100,6 @@ class Switcher extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys("W,A,S,D");
 
-    // timer
-    this.swinging = false;
-    this.timer = this.time.addEvent({
-      delay: 500, // ms
-      callback: () => {},
-      args: [],
-      callbackScope: this,
-      loop: false,
-      repeat: 0,
-      startAt: 0,
-      timeScale: 1,
-      paused: false,
-    });
-
-    // bg
-
-    // platforms
-
-    // collectible
-
     // score
     this.scoreText = this.add.text(16, 16, "score: 0", {
       fontSize: "32px",
@@ -165,10 +141,7 @@ class Switcher extends Phaser.Scene {
 
     // mobs
     this.mobs = this.physics.add.group();
-    spawnAroundFrame(this.mobs, "bomb", 50, 0, this.components);
-    this.mobs.create(666, 666, "bomb");
-
-
+    spawnAroundFrame(this.mobs, "bomb", 10, 0, this.components);
 
 		// const bombsLayer = this.add.layer()
     // this.components.addComponent(this.player, new Spawner(undefined, this.cursors, bombsLayer));
@@ -186,7 +159,6 @@ class Switcher extends Phaser.Scene {
 
   inputs() {
     if (this.cursors.up.isDown || this.keys.W.isDown) {
-      console.log('components:', this.components)
       this.player.setVelocityY(-160);
       this.player.anims.play("up", true);
     } else if (this.cursors.down.isDown || this.keys.S.isDown) {
