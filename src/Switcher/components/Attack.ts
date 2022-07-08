@@ -14,7 +14,6 @@ export class Attack implements IComponent {
     Phaser.GameObjects.Components.Transform;
   private stateMachine!: StateMachine;
 
-  private parent?: Phaser.GameObjects.Image;
   private hitbox!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
   private mobs?: Phaser.GameObjects.Image[] | Phaser.Physics.Arcade.Group;
 
@@ -27,6 +26,10 @@ export class Attack implements IComponent {
   // assets
   private sprite?: string;
   private fx?: string;
+
+  // Text
+  private nameText!: Phaser.GameObjects.Text;
+  private name = 'Basic Attack';
 
   // this may be creating a new instance of components
   init(
@@ -46,6 +49,11 @@ export class Attack implements IComponent {
 
   create() {
     const { scene } = this.gameObject;
+
+    this.nameText = scene.add
+      .text(this.gameObject.x, this.gameObject.y - 90, `HP: ${this.name}`)
+      .setOrigin(0.5);
+
     if (this.sprite) {
       this.hitbox = scene.physics.add.image(0, 0, this.sprite);
     } else {
@@ -101,6 +109,9 @@ export class Attack implements IComponent {
 
   update(dt: number) {
     this.stateMachine.update(dt);
+
+
+    this.nameText.setPosition(this.gameObject.x, this.gameObject.y - 90);
   }
 
   offCoolDownEnter() {
@@ -125,31 +136,43 @@ export class Attack implements IComponent {
   }
 
   attackEnter() {
-    // console.log("attackEnter");
-    if (!this.parent) return;
+    if (!this.gameObject) return;
 
     this.hitbox.body.enable = true;
     this.hitbox.visible = true;
     this.gameObject.scene.physics.world.add(this.hitbox.body);
     if (this.fx) this.gameObject.scene.sound.play(this.fx);
+
+    // Update attack positioning here to
+    // anchor at summoned location
+    // const x =
+    //   this.gameObject.x +
+    //   (this.gameObject.flipX ? -this.gameObject.width : this.gameObject.width);
+    // const y = this.gameObject.y + this.gameObject.height * 0.2;
+    // this.hitbox.x = x;
+    // this.hitbox.y = y;
+    // this.lElipse.x = x - 64;
+    // this.lElipse.y = y + 32;
+    // this.cdElipse.x = x - 32;
+    // this.cdElipse.y = y + 32;
   }
 
   attackUpdate(dt: number) {
-    if (!this.parent) return;
+    if (!this.gameObject) return;
+
+    // Update attack positioning here to
+    // follow the player
     const x =
-      this.parent.x +
-      (this.parent.flipX ? -this.parent.width : this.parent.width);
-    const y = this.parent.y + this.parent.height * 0.2;
-    this.hitbox.x = x;
-    this.hitbox.y = y;
-    this.lElipse.x = x - 64;
-    this.lElipse.y = y + 32;
-    this.cdElipse.x = x - 32;
-    this.cdElipse.y = y + 32;
+      this.gameObject.x +
+      (this.gameObject.flipX ? -this.gameObject.width : this.gameObject.width);
+    const y = this.gameObject.y + this.gameObject.height * 0.2;
+
+    this.hitbox.setPosition(x, y);
+    this.lElipse.setPosition(x - 64, y + 32);
+    this.cdElipse.setPosition(x - 32, y + 32);
 
     // timer
     this.lTimer += dt;
-    // console.log({dt, timer: this.lTimer})
     if (this.lTimer >= this.linger) {
       this.lTimer = 0;
       this.hitbox.body.enable = false;
@@ -161,10 +184,6 @@ export class Attack implements IComponent {
 
     const angle = (this.lTimer / this.linger) * 64;
     this.lElipse.height = angle;
-  }
-
-  setParent(parent: Phaser.GameObjects.Image) {
-    this.parent = parent;
   }
 
   setMobs(mobs: Phaser.GameObjects.Image[]) {

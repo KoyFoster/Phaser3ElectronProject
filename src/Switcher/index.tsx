@@ -7,6 +7,7 @@ import Spawner from "./components/Spawner";
 import Preloader from "./scenes/preloader";
 import { Attack } from "./components/Attack";
 import { Damage } from "./components/Damage";
+import { PlayerMovement } from "./components/PlayerMovement";
 
 const width = 1920 * 0.75;
 const height = 1080 * 0.75;
@@ -27,11 +28,13 @@ function spawnAroundFrame(
       x > y ? x - padding : i ? width + padding : 0,
       x > y ? (i ? height + padding : 0) : y - padding,
       sprite
-    );
-    const comp = new Damage()
+    ) as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+    const comp = new Damage();
     components.addComponent(mob, comp);
     // components.removeComponent(mob, comp);
-    mob.setFriction(120);
+    mob.setVelocity(240, 0);
+    mob.setVelocity(240, 0);
+    mob.setFriction(1);
   }
 }
 
@@ -44,20 +47,19 @@ class Switcher extends Phaser.Scene {
   keys: any;
 
   score = 0;
-  scoreText!: Phaser.GameObjects.Text;
+  debugText!: Phaser.GameObjects.Text;
   gameOver = false;
 
   constructor() {
     super("Switcher");
   }
 
-  preload() {
-  }
+  preload() {}
 
   followPlayer() {
     // chase player
     this.mobs.children.iterate((mob) => {
-      this.physics.accelerateToObject(mob, this.player, 120);
+      this.physics.moveToObject(mob, this.player, 120);
     });
   }
 
@@ -101,12 +103,14 @@ class Switcher extends Phaser.Scene {
     this.keys = this.input.keyboard.addKeys("W,A,S,D");
 
     // score
-    this.scoreText = this.add.text(16, 16, "score: 0", {
+    this.debugText = this.add.text(16, 16, "debugText: 0", {
       fontSize: "32px",
-      fill: "#000000",
+      color: "#eeee00",
     });
 
     this.player = this.physics.add.sprite(width * 0.5, height * 0.5, "dude");
+    this.player.setDrag(0.0001);
+    this.player.setDamping(true);
 
     this.cameras.main.startFollow(this.player);
 
@@ -143,53 +147,29 @@ class Switcher extends Phaser.Scene {
     this.mobs = this.physics.add.group();
     spawnAroundFrame(this.mobs, "bomb", 10, 0, this.components);
 
-		// const bombsLayer = this.add.layer()
+    // const bombsLayer = this.add.layer()
     // this.components.addComponent(this.player, new Spawner(undefined, this.cursors, bombsLayer));
     // add attack to player
-    const newAttack = new Attack('upswing', 'swipe');
+    const newAttack = new Attack("upswing", "swipe");
+    this.components.addComponent(this.player, new PlayerMovement(this.cursors, this.keys));
     this.components.addComponent(this.player, newAttack);
-    newAttack.setParent(this.player);
     newAttack.setMobs(this.mobs as Phaser.Physics.Arcade.Group);
-    newAttack.setInput(() => { return this.cursors.space.isDown });
+    newAttack.setInput(() => {
+      return this.cursors.space.isDown;
+    });
 
     // collisions
     this.physics.add.collider(this.mobs, this.boundaries);
     this.physics.add.collider(this.player, this.boundaries);
   }
 
-  inputs() {
-    if (this.cursors.up.isDown || this.keys.W.isDown) {
-      this.player.setVelocityY(-160);
-      this.player.anims.play("up", true);
-    } else if (this.cursors.down.isDown || this.keys.S.isDown) {
-      this.player.setVelocityY(160);
-      this.player.anims.play("down", true);
-    } else {
-      this.player.setVelocityY(0);
-    }
-
-    if (this.cursors.left.isDown || this.keys.A.isDown) {
-      this.player.setVelocityX(-160);
-      this.player.anims.play("left", true);
-    } else if (this.cursors.right.isDown || this.keys.D.isDown) {
-      this.player.setVelocityX(160);
-      this.player.anims.play("right", true);
-    } else {
-      this.player.setVelocityX(0);
-    }
-
-    // check if player is moving
-    if (!this.player.body.velocity.x && !this.player.body.velocity.y) {
-      this.player.anims.play("turn", true);
-    }
-  }
-
   update(t: number, dt: number) {
-    this.inputs();
+    this.debugText.text = `Vel: [${this.player.body.velocity.x}, ${this.player.body.velocity.y}],
+    Acc: [${this.player.body.acceleration.x}, ${this.player.body.acceleration.y}]`
 
     this.followPlayer();
 
-		this.components.update(dt)
+    this.components.update(dt);
   }
 }
 
