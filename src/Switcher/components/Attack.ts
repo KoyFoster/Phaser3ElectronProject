@@ -35,7 +35,7 @@ function foeKnockback(
 }
 
 export class Attack implements IComponent {
-  private cooldown = 1000 as number;
+  private cooldown = 500 as number;
   private cdTimer = 0 as number;
   private linger = 250 as number;
   private lTimer = 0 as number;
@@ -163,6 +163,24 @@ export class Attack implements IComponent {
     this.cdElipse.height = angle;
   }
 
+  setAttackInFront() {
+    const x = this.gameObject.x;
+    const y = this.gameObject.y;
+    let dir = { x: 0, y: 0 };
+    if (this.gameObject.body.lastAngle !== undefined) {
+      dir = this.gameObject.scene.physics.velocityFromRotation(
+        this.gameObject.body.lastAngle,
+        60
+      );
+      this.hitbox.rotation = this.gameObject.body.lastAngle + Math.PI * 0.5;
+    }
+
+    console.log("dir:", dir);
+    this.hitbox.setPosition(x + dir.x, y + dir.y);
+    this.lElipse.setPosition(x - 64, y + 32);
+    this.cdElipse.setPosition(x - 32, y + 32);
+  }
+
   attackEnter() {
     if (!this.gameObject) return;
 
@@ -170,21 +188,16 @@ export class Attack implements IComponent {
     this.hitbox.visible = true;
     this.gameObject.scene.physics.world.add(this.hitbox.body);
     if (this.fx) this.gameObject.scene.sound.play(this.fx);
+
+    // Position into the facing direction
+    this.setAttackInFront();
   }
 
   attackUpdate(dt: number) {
     if (!this.gameObject) return;
 
-    // Update attack positioning here to
-    // follow the player
-    const x =
-      this.gameObject.x +
-      (this.gameObject.flipX ? -this.gameObject.width : this.gameObject.width);
-    const y = this.gameObject.y + this.gameObject.height * 0.2;
-
-    this.hitbox.setPosition(x, y);
-    this.lElipse.setPosition(x - 64, y + 32);
-    this.cdElipse.setPosition(x - 32, y + 32);
+    // Position into the facing direction
+    this.setAttackInFront();
 
     // timer
     this.lTimer += dt;
@@ -217,7 +230,7 @@ export class Attack implements IComponent {
   }
 
   handleHit = (
-    obj1: Phaser.GameObjects.GameObject &
+    _obj1: Phaser.GameObjects.GameObject &
       Phaser.GameObjects.Components.Transform,
     obj2: Phaser.GameObjects.GameObject &
       Phaser.GameObjects.Components.Transform
