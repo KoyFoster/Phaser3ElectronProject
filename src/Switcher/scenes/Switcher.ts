@@ -68,21 +68,22 @@ export class Switcher extends Phaser.Scene {
       "tile0"
     );
     // frame
+    const thiccness = 100;
     this.boundaries
       .create(width * 0.5, 0, "pixel")
-      .setScale(width, 1)
+      .setScale(width, thiccness)
       .refreshBody(); // Top
     this.boundaries
       .create(width * 0.5, height, "pixel")
-      .setScale(width, 1)
+      .setScale(width, thiccness)
       .refreshBody(); // Bottom
     this.boundaries
       .create(0, height * 0.5, "pixel")
-      .setScale(1, height)
+      .setScale(thiccness, height)
       .refreshBody(); // Left
     this.boundaries
       .create(width, height * 0.5, "pixel")
-      .setScale(1, height)
+      .setScale(thiccness, height)
       .refreshBody(); // Right
 
     // listeners
@@ -130,7 +131,9 @@ export class Switcher extends Phaser.Scene {
     });
 
     // collisions
+    this.physics.add.collider(this.mobs, this.mobs);
     this.physics.add.collider(this.mobs, this.boundaries);
+    this.physics.add.collider(this.mobs, this.player);
     this.physics.add.collider(this.player, this.boundaries);
   }
 

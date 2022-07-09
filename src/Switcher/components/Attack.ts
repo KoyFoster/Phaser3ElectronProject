@@ -40,7 +40,7 @@ export class Attack implements IComponent {
   private linger = 250 as number;
   private lTimer = 0 as number;
 
-  private force = 2000 as number;
+  private force = 500 as number;
 
   private components!: IComponentService;
   private gameObject!: Phaser.GameObjects.GameObject &
