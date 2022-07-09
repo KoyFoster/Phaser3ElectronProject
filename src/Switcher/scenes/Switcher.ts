@@ -134,7 +134,8 @@ export class Switcher extends Phaser.Scene {
 
   update(t: number, dt: number) {
     this.debugText.text = `Vel: [${this.player.body.velocity.x}, ${this.player.body.velocity.y}],
-      Acc: [${this.player.body.acceleration.x}, ${this.player.body.acceleration.y}]`;
+    Acc: [${this.player.body.acceleration.x}, ${this.player.body.acceleration.y}],
+    Angle: [${this.player.body.angle}]`;
 
     this.followPlayer();
     this.components.update(dt);

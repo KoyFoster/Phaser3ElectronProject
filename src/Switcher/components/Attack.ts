@@ -3,6 +3,19 @@ import IComponentService, { IComponent } from "../services/ComponentService";
 import StateMachine from "../statemachine/StateMachine";
 import { Damage } from "./Damage";
 
+ // common physics calls
+ function selfKnockback(entity: Phaser.Types.Physics.Arcade.ImageWithDynamicBody)
+ {
+    // send player backwards
+    const angle = entity.body.angle ? entity.body.angle * (180 / Math.PI) : 0;
+    console.log("angle:", angle);
+    const vel = entity.scene.physics.velocityFromAngle(angle, 3000);
+    entity.setVelocity(
+      entity.body.velocity.x - vel.x,
+      entity.body.velocity.y - vel.y
+    );
+ }
+
 export class Attack implements IComponent {
   private cooldown = 1000 as number;
   private cdTimer = 0 as number;
@@ -29,7 +42,7 @@ export class Attack implements IComponent {
 
   // Text
   private nameText!: Phaser.GameObjects.Text;
-  private name = 'Basic Attack';
+  private name = "Basic Attack";
 
   // this may be creating a new instance of components
   init(
@@ -110,7 +123,6 @@ export class Attack implements IComponent {
   update(dt: number) {
     this.stateMachine.update(dt);
 
-
     this.nameText.setPosition(this.gameObject.x, this.gameObject.y - 90);
   }
 
@@ -137,6 +149,8 @@ export class Attack implements IComponent {
 
   attackEnter() {
     if (!this.gameObject) return;
+
+    selfKnockback(this.gameObject);
 
     this.hitbox.body.enable = true;
     this.hitbox.visible = true;
