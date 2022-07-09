@@ -1,5 +1,6 @@
 import { Attack } from "../components/Attack";
 import { Damage } from "../components/Damage";
+import { Follow } from "../components/Follow";
 import { PlayerMovement } from "../components/PlayerMovement";
 import IComponentService from "../services/ComponentService";
 
@@ -7,6 +8,7 @@ function spawnAroundFrame(
   width: number,
   height: number,
   group: Phaser.Physics.Arcade.Group,
+  target: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
   sprite: string,
   num: number,
   padding = 500,
@@ -24,10 +26,7 @@ function spawnAroundFrame(
     ) as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
     const comp = new Damage();
     components.addComponent(mob, comp);
-    // components.removeComponent(mob, comp);
-    mob.setVelocity(240, 0);
-    mob.setVelocity(240, 0);
-    mob.setFriction(1);
+    components.addComponent(mob, new Follow(target));
   }
 }
 
@@ -48,13 +47,6 @@ export class Switcher extends Phaser.Scene {
   }
 
   preload() {}
-
-  followPlayer() {
-    // chase player
-    this.mobs.children.iterate((mob) => {
-      this.physics.moveToObject(mob, this.player, 120);
-    });
-  }
 
   init() {
     this.components = new IComponentService();
@@ -111,7 +103,17 @@ export class Switcher extends Phaser.Scene {
 
     // Spawn some mobs
     this.mobs = this.physics.add.group();
-    spawnAroundFrame(width, height, this.mobs, "bomb", 10, 0, this.components);
+
+    spawnAroundFrame(
+      width,
+      height,
+      this.mobs,
+      this.player,
+      "bomb",
+      10,
+      0,
+      this.components
+    );
 
     // Add movement to player
     this.components.addComponent(
@@ -137,7 +139,6 @@ export class Switcher extends Phaser.Scene {
     Acc: [${this.player.body.acceleration.x}, ${this.player.body.acceleration.y}],
     Angle: [${this.player.body.angle}]`;
 
-    this.followPlayer();
     this.components.update(dt);
   }
 }

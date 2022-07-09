@@ -69,9 +69,7 @@ export default class IComponentService implements IComponentsService {
       return;
     }
 
-    console.log("1.", this.componentsByGameObject.size);
     list.splice(index, 1);
-    console.log("2.", this.componentsByGameObject.size);
 
     console.error("destroy:", component);
     component.destroy?.();

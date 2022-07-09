@@ -62,15 +62,12 @@ export class Damage implements IComponent {
   }
 
   awake() {
-    // console.log("awake");
   }
 
   start() {
-    // console.log("start");
   }
 
   destroy() {
-    console.log("destroy");
     this.hpText.destroy();
   }
 

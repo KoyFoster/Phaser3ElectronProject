@@ -1,26 +1,46 @@
+import { Vector } from "matter";
 import Phaser from "phaser";
 import IComponentService, { IComponent } from "../services/ComponentService";
 import StateMachine from "../statemachine/StateMachine";
 import { Damage } from "./Damage";
 
- // common physics calls
- function selfKnockback(entity: Phaser.Types.Physics.Arcade.ImageWithDynamicBody)
- {
-    // send player backwards
-    const angle = entity.body.angle ? entity.body.angle * (180 / Math.PI) : 0;
-    console.log("angle:", angle);
-    const vel = entity.scene.physics.velocityFromAngle(angle, 3000);
-    entity.setVelocity(
-      entity.body.velocity.x - vel.x,
-      entity.body.velocity.y - vel.y
-    );
- }
+// common physics calls
+function posPulse(
+  entity: Phaser.Types.Physics.Arcade.ImageWithDynamicBody,
+  direction: number,
+  speed: number
+) {
+  // send player backwards
+  const vel = entity.scene.physics.velocityFromRotation(direction, speed);
+  entity.setVelocity(
+    entity.body.velocity.x - vel.x,
+    entity.body.velocity.y - vel.y
+  );
+}
+
+function selfKnockback(
+  entity: Phaser.Types.Physics.Arcade.ImageWithDynamicBody,
+  force: number
+) {
+  // send player backwards
+  posPulse(entity, entity.body.angle, force);
+}
+
+function foeKnockback(
+  angle: number,
+  foe: Phaser.Types.Physics.Arcade.ImageWithDynamicBody,
+  force: number
+) {
+  posPulse(foe, angle - Math.PI, force);
+}
 
 export class Attack implements IComponent {
   private cooldown = 1000 as number;
   private cdTimer = 0 as number;
   private linger = 250 as number;
   private lTimer = 0 as number;
+
+  private force = 2000 as number;
 
   private components!: IComponentService;
   private gameObject!: Phaser.GameObjects.GameObject &
@@ -49,7 +69,6 @@ export class Attack implements IComponent {
     go: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform,
     components: IComponentService
   ) {
-    console.log({ go, components });
     this.gameObject = go;
     this.components = components;
     this.create();
@@ -126,9 +145,7 @@ export class Attack implements IComponent {
     this.nameText.setPosition(this.gameObject.x, this.gameObject.y - 90);
   }
 
-  offCoolDownEnter() {
-    // console.log("offCoolDownEnter");
-  }
+  offCoolDownEnter() {}
   offCoolDownUpdate() {
     if (this.input && this.input()) {
       this.stateMachine.setState("attack");
@@ -138,7 +155,6 @@ export class Attack implements IComponent {
   onCoolDownEnter() {}
   onCoolDownUpdate(dt: number) {
     this.cdTimer += dt;
-    // console.log({dt, timer: this.cdTimer})
     if (this.cdTimer >= this.cooldown) {
       this.cdTimer = 0;
       this.stateMachine.setState("off-cooldown");
@@ -150,25 +166,10 @@ export class Attack implements IComponent {
   attackEnter() {
     if (!this.gameObject) return;
 
-    selfKnockback(this.gameObject);
-
     this.hitbox.body.enable = true;
     this.hitbox.visible = true;
     this.gameObject.scene.physics.world.add(this.hitbox.body);
     if (this.fx) this.gameObject.scene.sound.play(this.fx);
-
-    // Update attack positioning here to
-    // anchor at summoned location
-    // const x =
-    //   this.gameObject.x +
-    //   (this.gameObject.flipX ? -this.gameObject.width : this.gameObject.width);
-    // const y = this.gameObject.y + this.gameObject.height * 0.2;
-    // this.hitbox.x = x;
-    // this.hitbox.y = y;
-    // this.lElipse.x = x - 64;
-    // this.lElipse.y = y + 32;
-    // this.cdElipse.x = x - 32;
-    // this.cdElipse.y = y + 32;
   }
 
   attackUpdate(dt: number) {
@@ -202,7 +203,6 @@ export class Attack implements IComponent {
 
   setMobs(mobs: Phaser.GameObjects.Image[]) {
     this.mobs = mobs;
-    // console.log({ mobs: this.mobs, hb: this.hitbox });
     this.gameObject.scene.physics.add.overlap(
       this.hitbox,
       this.mobs,
@@ -225,20 +225,17 @@ export class Attack implements IComponent {
     const comp = this.components.findComponent(obj2, Damage);
     if (comp) {
       comp.setState("damage");
-      if (comp.getHP <= 100) {
+      foeKnockback(this.gameObject.body.lastAngle, obj2, this.force);
+      if (comp.getHP <= 0) {
         this.components.removeAllComponents(obj2);
         obj2.destroy();
       }
     }
   };
 
-  awake() {
-    // console.log("awake");
-  }
+  awake() {}
 
-  start() {
-    // console.log("start");
-  }
+  start() {}
 
   destroy() {}
 

@@ -95,7 +95,6 @@ export default class AttackScene extends Phaser.Scene {
     this.physics.add.existing(this.attackHitBox);
     this.attackHitBox.body.enable = false;
     this.physics.world.remove(this.attackHitBox.body);
-    console.log(this.attackHitBox.body);
 
     this.physics.add.collider(this.entity, this.box);
 

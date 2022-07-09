@@ -11,17 +11,14 @@ export class PhaserComponent implements IComponent
     }
 
     awake(){
-        console.log('awake')
     }
 
     start()
     {
-        console.log('start')
         this.gameObject.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, this.handleClick, this)
     }
 
     destroy(){
-        console.log('destroy')
         this.gameObject.off(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, this.handleClick, this)
     }
 
