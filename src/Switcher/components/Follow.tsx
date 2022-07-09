@@ -7,7 +7,7 @@ export class Follow implements IComponent {
     | Phaser.GameObjects.GameObject
     | Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private target!: Phaser.GameObjects.GameObject;
-  private speed = 2 as number;
+  private speed = 1 as number;
 
   constructor(target: Phaser.GameObjects.GameObject) {
     this.target = target;
