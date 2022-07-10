@@ -6,7 +6,7 @@ export type Constructor<T extends {} = {}> = new (...args: any[]) => T;
 export interface IComponent {
   init: (
     go: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform,
-    components: IComponentService
+    components: ComponentService
   ) => void;
 
   awake?: () => void;
@@ -30,7 +30,7 @@ export interface IComponentsService {
   update(dt: number): void;
 }
 
-export default class IComponentService implements IComponentsService {
+export default class ComponentService implements IComponentsService {
   private componentsByGameObject = new Map<string, IComponent[]>();
   private queueForStart: IComponent[] = [];
 
@@ -48,6 +48,7 @@ export default class IComponentService implements IComponentsService {
     // add newcomponent to this gameobjects's list
     const list = this.componentsByGameObject.get(go.name) as IComponent[];
 
+    console.warn("add component:", component);
     list.push(component);
 
     // call the lifecycle hooks
@@ -86,6 +87,7 @@ export default class IComponentService implements IComponentsService {
       const components = this.componentsByGameObject.get(go.name) ?? [];
 
       components.forEach((component) => {
+        console.warn("delete:", component);
         component.destroy?.();
       });
     }

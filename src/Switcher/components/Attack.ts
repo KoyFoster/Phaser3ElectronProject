@@ -1,7 +1,6 @@
 import Phaser from "phaser";
-import IComponentService, { IComponent } from "../services/ComponentService";
+import ComponentService, { IComponent } from "../services/ComponentService";
 import StateMachine from "../statemachine/StateMachine";
-import { Damage } from "./Damage";
 import { Effect } from "./Status/Effect";
 import { CommonPhysX } from "./Utils/CommonPhysX";
 
@@ -13,7 +12,7 @@ export class Attack implements IComponent {
 
   private force = 500 as number;
 
-  private components!: IComponentService;
+  private components!: ComponentService;
   private gameObject!: Phaser.GameObjects.GameObject &
     Phaser.GameObjects.Components.Transform;
   private stateMachine!: StateMachine;
@@ -40,7 +39,7 @@ export class Attack implements IComponent {
   // this may be creating a new instance of components
   init(
     go: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform,
-    components: IComponentService
+    components: ComponentService
   ) {
     this.gameObject = go;
     this.components = components;
@@ -206,25 +205,24 @@ export class Attack implements IComponent {
   }
 
   handleHit = (
-    _obj1: Phaser.GameObjects.GameObject &
+    obj1: Phaser.GameObjects.GameObject &
       Phaser.GameObjects.Components.Transform,
     obj2: Phaser.GameObjects.GameObject &
       Phaser.GameObjects.Components.Transform
   ) => {
-    const comp = this.components.findComponent(obj2, Damage);
-    if (comp) {
-      // comp.setState("damage");
-      CommonPhysX.foeKnockback(this.gameObject.mouseAngle, obj2, this.force);
+    console.error("hit");
+    obj2.dealDamage(11);
+    CommonPhysX.foeKnockback(this.gameObject.mouseAngle, obj2, this.force);
 
-      // Apply Slow: add only once
-      const effect = this.components.findComponent(obj2, Effect);
-      if (!effect)
-        this.components.addComponent(obj2, new Effect(this.components));
+    // Apply Slow: add only once
+    const effect = this.components.findComponent(obj2, Effect);
+    if (!effect)
+      this.components.addComponent(obj2, new Effect(this.components));
 
-      // if (comp.getHP <= 0) {
-      //   this.components.removeAllComponents(obj2);
-      //   obj2.destroy();
-      // }
+    console.log(obj2.properties);
+    if (obj2.properties.hp <= 99) {
+      this.components.removeAllComponents(obj2);
+      obj2.destroy();
     }
   };
 

@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import StateMachine from '../statemachine/StateMachine'
-import IComponentService, { IComponent } from '../services/ComponentService'
+import ComponentService, { IComponent } from '../services/ComponentService'
 // import Countdown from './Countdown'
 // import Explosion from './Explosion'
 
@@ -11,7 +11,7 @@ export default class Spawner implements IComponent
 	private readonly layer?: Phaser.GameObjects.Layer
 
 	private gameObject!: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform
-	private components!: IComponentService
+	private components!: ComponentService
 
 	// private selectionCursor?: SelectionCursor
 
@@ -36,7 +36,7 @@ export default class Spawner implements IComponent
 			.setState('idle')
 	}
 
-	init(go: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform, components: IComponentService)
+	init(go: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform, components: ComponentService)
 	{
 		this.gameObject = go
 		this.components = components

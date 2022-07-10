@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import IComponentService from "../services/ComponentService";
+import ComponentService from "../services/ComponentService";
 
 import bomb from "../../assets/bomb.png";
 
@@ -9,7 +9,7 @@ import Spawner from "../components/Spawner";
 
 export class GameScene extends Phaser.Scene {
   private stateMachine!: StateMachine;
-  private components!: IComponentService;
+  private components!: ComponentService;
   private entities: Phaser.GameObjects.Image[] = [];
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
 
@@ -23,7 +23,7 @@ export class GameScene extends Phaser.Scene {
 
 
   init() {
-    this.components = new IComponentService();
+    this.components = new ComponentService();
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.components.destroy();
     });

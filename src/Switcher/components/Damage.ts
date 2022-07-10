@@ -7,10 +7,10 @@ export class Damage implements IComponent {
     Phaser.GameObjects.Components.Transform;
   private stateMachine!: StateMachine;
   private hpText!: Phaser.GameObjects.Text;
-  private HP = 100;
+  private nextDmg = 0;
 
   get getHP() {
-    return this.HP;
+    return this.gameObject.properties?.hp;
   }
 
   init(
@@ -22,7 +22,7 @@ export class Damage implements IComponent {
 
   create() {
     this.hpText = this.gameObject.scene.add
-      .text(this.gameObject.x, this.gameObject.y - 90, `HP: ${this.HP}`)
+      .text(this.gameObject.x, this.gameObject.y - 90, `HP: ${this.getHP}`)
       .setOrigin(0.5);
 
     this.stateMachine = new StateMachine(this, `${this.gameObject.name} damage`)
@@ -45,6 +45,11 @@ export class Damage implements IComponent {
     this.gameObject.fillColor = 0xffffff;
   }
 
+  doDamage(value: number) {
+    this.nextDmg = value;
+    this.stateMachine.setState("damage");
+  }
+
   setState(name: string) {
     this.stateMachine.setState(name);
   }
@@ -53,23 +58,20 @@ export class Damage implements IComponent {
     console.error("damage");
     this.gameObject.fillColor = 0xff0000;
 
-    this.HP -= 10;
-    this.hpText.text = `HP: ${this.HP}`;
+    this.gameObject.properties.hp -= this.nextDmg;
+    this.nextDmg = 0;
+    this.hpText.text = `HP: ${this.getHP}`;
 
     this.gameObject.scene.time.delayedCall(500, () => {
       this.stateMachine.setState("idle");
     });
   }
 
-  awake() {
-  }
+  awake() {}
 
-  start() {
-  }
+  start() {}
 
   destroy() {
     this.hpText.destroy();
   }
-
-  private handleClick() {}
 }

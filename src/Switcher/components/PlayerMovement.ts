@@ -1,5 +1,4 @@
 import Phaser, { Math as PMath } from "phaser";
-const { Between } = PMath.Angle;
 import { IComponent } from "../services/ComponentService";
 import StateMachine from "../statemachine/StateMachine";
 
@@ -86,24 +85,9 @@ export class PlayerMovement implements IComponent {
     if (this.gameObject.body.velocity.x || this.gameObject.body.velocity.y) {
       this.gameObject.body.lastAngle = this.gameObject.body.angle;
     }
-
-    // get direction of player to relation to cursor
-    // let facing = null;
-    // console.log('input:', this.gameObject.input)
-    // if (this.gameObject.)
-    //   facing = Between(
-    //     this.gameObject.body.position.x,
-    //     this.gameObject.body.position.y,
-    //     this.gameObject.input.pointer.x,
-    //     this.gameObject.input.pointer.y
-    //   );
   }
 
   awake() {}
-
-  start() {
-  }
-
-  destroy() {
-  }
+  start() {}
+  destroy() {}
 }

@@ -1,33 +1,23 @@
 import Phaser, { Math as PMath } from "phaser";
 import { IComponent, IComponentsService } from "../services/ComponentService";
-import { Entity } from "./Entity";
-import { IEntityProps } from "./Properties/Entity";
 const { Between } = PMath.Angle;
 
 export class Follow implements IComponent {
   private gameObject!:
     | Phaser.GameObjects.GameObject
     | Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-  private properties?: IEntityProps;
-  private components!: IComponentsService;
   private target!: Phaser.GameObjects.GameObject;
 
   constructor(
-    target: Phaser.GameObjects.GameObject,
-    components: IComponentsService
+    target: Phaser.GameObjects.GameObject
   ) {
     this.target = target;
-    this.components = components;
   }
 
   init(go: Phaser.GameObjects.GameObject) {
     this.gameObject = go;
 
-    if (this.components) {
-      const ent = this.components.findComponent(this.gameObject, Entity);
-      if (ent) this.properties = ent.properties;
-    }
-
+    console.log('gameObject:', this.gameObject);
     const entity = this
       .gameObject as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
     entity.setDrag(0.0001) as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -35,8 +25,6 @@ export class Follow implements IComponent {
   }
 
   followPlayer(dt: number) {
-    if (!this.properties) return;
-
     const self = this
       .gameObject as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
     const target = this
@@ -51,7 +39,7 @@ export class Follow implements IComponent {
 
     const dir = self.scene.physics.velocityFromRotation(
       angle,
-      this.properties.speed
+      this.gameObject.properties.speed
     );
     self.setVelocity(
       self.body.velocity.x + dir.x * dt,

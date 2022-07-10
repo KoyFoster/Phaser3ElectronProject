@@ -1,41 +1,50 @@
-import Phaser, { Math as PMath } from "phaser";
+import Phaser, { Math as PMath, Scene } from "phaser";
 import { Attack } from "../components/Attack";
 import { Damage } from "../components/Damage";
-import { Entity } from "../components/Entity";
 import { Follow } from "../components/Follow";
 import { PlayerMovement } from "../components/PlayerMovement";
-import IComponentService from "../services/ComponentService";
+import { Entity } from "../Entities/Entity";
+import ComponentService from "../services/ComponentService";
 const { Between } = PMath.Angle;
 
 function spawnAroundFrame(
+  context: Scene,
   width: number,
   height: number,
   group: Phaser.Physics.Arcade.Group,
   target: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
   sprite: string,
   num: number,
-  padding = 500,
-  components: IComponentService
+  padding = 500
 ) {
   // spawn right outside of view
   for (let i = 0; i < num; i += 1) {
     const x = Math.floor(Math.random() * width);
     const y = Math.floor(Math.random() * height);
     const i = Math.random() > 0.5;
-    const mob = group.create(
+    const mob = new Entity(
+      context,
       x > y ? x - padding : i ? width + padding : 0,
       x > y ? (i ? height + padding : 0) : y - padding,
       sprite
-    ) as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-    const comp = new Damage();
-    components.addComponent(mob, comp);
-    components.addComponent(mob, new Entity());
-    components.addComponent(mob, new Follow(target, components));
+    );
+
+    group.add(mob);
+
+    const mob2 = group.create(
+      x > y ? x - padding : i ? width + padding : 0,
+      x > y ? (i ? height + padding : 0) : y - padding,
+      "bomb"
+    );
+
+    console.log("mob2:", mob2);
+
+    mob.follow(target);
   }
 }
 
 export class Switcher extends Phaser.Scene {
-  private components!: IComponentService;
+  private components!: ComponentService;
   boundaries!: Phaser.Physics.Arcade.StaticGroup;
   player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   mobs!: Phaser.Physics.Arcade.Group;
@@ -53,7 +62,7 @@ export class Switcher extends Phaser.Scene {
   preload() {}
 
   init() {
-    this.components = new IComponentService();
+    this.components = new ComponentService();
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.components.destroy();
     });
@@ -64,13 +73,13 @@ export class Switcher extends Phaser.Scene {
 
     // boundaries
     this.boundaries = this.physics.add.staticGroup();
-    const tile = this.add.tileSprite(
-      width * 0.5,
-      height * 0.5,
-      width,
-      height,
-      "tile0"
-    );
+    // const tile = this.add.tileSprite(
+    //   width * 0.5,
+    //   height * 0.5,
+    //   width,
+    //   height,
+    //   "tile0"
+    // );
     // frame
     const thiccness = 100;
     this.boundaries
@@ -109,16 +118,9 @@ export class Switcher extends Phaser.Scene {
     // Spawn some mobs
     this.mobs = this.physics.add.group();
 
-    spawnAroundFrame(
-      width,
-      height,
-      this.mobs,
-      this.player,
-      "bomb",
-      1,
-      0,
-      this.components
-    );
+    spawnAroundFrame(this, width, height, this.mobs, this.player, "bomb", 1, 0);
+
+    this.mobs.add(new Entity(this, 500, 500, "bomb", 0));
 
     // Add movement to player
     this.components.addComponent(
@@ -129,7 +131,7 @@ export class Switcher extends Phaser.Scene {
     // Set new attack
     const newAttack = new Attack("upswing", "swipe");
     this.components.addComponent(this.player, newAttack);
-    newAttack.setMobs(this.mobs as Phaser.Physics.Arcade.Group);
+    newAttack.setMobs(this.mobs);
     // newAttack.setkeyInput(() => {
     //   return this.cursors.space.isDown;
     // }, this);
@@ -144,8 +146,6 @@ export class Switcher extends Phaser.Scene {
     // listeners
     window.addEventListener("mousemove", (e) => this.mouseMove(e));
   }
-
-  destroy() {}
 
   mouseMove(e) {
     const { width, height } = this.sys.game.canvas;
@@ -163,5 +163,12 @@ export class Switcher extends Phaser.Scene {
     Angle: [${this.player.body.angle}]`;
 
     this.components.update(dt);
+
+    // update mobs
+    this.mobs.getChildren().forEach((element) => {
+      element.update(t, dt);
+    });
   }
+
+  destroy() {}
 }
