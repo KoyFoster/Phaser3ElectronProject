@@ -77,7 +77,7 @@ export default class ComponentService implements IComponentsService {
 
     list.splice(index, 1);
 
-    // console.error("destroy:", component);
+    console.error("destroy:", component);
     component.destroy?.();
     // console.error("componentsByGameObject:", this.componentsByGameObject);
   }

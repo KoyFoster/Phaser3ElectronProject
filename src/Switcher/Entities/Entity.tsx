@@ -4,6 +4,8 @@ import { Follow } from "../components/Follow";
 
 import { EntityProps, IEntityProps } from "../components/Properties/Entity";
 import ComponentService, {
+  Constructor,
+  IComponent,
   IComponentsService,
 } from "../services/ComponentService";
 
@@ -23,13 +25,18 @@ export class Entity extends Phaser.Physics.Arcade.Sprite {
     texture: string | Phaser.Textures.Texture,
     frame?: string | number | undefined
   ) {
-    // super(scene, type);
     console.log("Entity: ", { scene, x, y, texture, frame });
     super(scene, x, y, texture, frame);
     scene.add.existing(this);
     this.extendDestroy();
 
+    // Create Component Manager
     this.components = new ComponentService();
+    scene.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.components.destroy();
+    });
+
+    // Add Components
     this.damage = new Damage();
     this.components.addComponent(this, this.damage);
   }
@@ -38,6 +45,18 @@ export class Entity extends Phaser.Physics.Arcade.Sprite {
     // extend destroy
     this.d = this.destroy;
     this.destroy = this.destruct;
+  }
+
+  addComponent(component: IComponent) {
+    this.components.addComponent(this, component);
+  }
+
+  removeComponent(component: IComponent) {
+    this.components.removeComponent(this, component);
+  }
+
+  findComponent<ComponentType>(componentType: Constructor<ComponentType>) {
+    return this.components.findComponent(this, componentType);
   }
 
   dealDamage(value: number) {

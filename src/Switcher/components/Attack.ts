@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { Entity } from "../Entities/Entity";
 import ComponentService, { IComponent } from "../services/ComponentService";
 import StateMachine from "../statemachine/StateMachine";
 import { Effect } from "./Status/Effect";
@@ -13,8 +14,7 @@ export class Attack implements IComponent {
   private force = 500 as number;
 
   private components!: ComponentService;
-  private gameObject!: Phaser.GameObjects.GameObject &
-    Phaser.GameObjects.Components.Transform;
+  private gameObject!: Entity;
   private stateMachine!: StateMachine;
 
   private hitbox!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
@@ -41,7 +41,7 @@ export class Attack implements IComponent {
     go: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform,
     components: ComponentService
   ) {
-    this.gameObject = go;
+    this.gameObject = go as Entity;
     this.components = components;
     this.create();
   }
@@ -187,7 +187,7 @@ export class Attack implements IComponent {
     this.gameObject.scene.physics.add.overlap(
       this.hitbox,
       this.mobs,
-      this.handleHit,
+      this.handleHit as ArcadePhysicsCallback,
       undefined,
       this.gameObject
     );
@@ -207,20 +207,18 @@ export class Attack implements IComponent {
   handleHit = (
     obj1: Phaser.GameObjects.GameObject &
       Phaser.GameObjects.Components.Transform,
-    obj2: Phaser.GameObjects.GameObject &
-      Phaser.GameObjects.Components.Transform
+    obj2: Entity
   ) => {
     console.error("hit");
     obj2.dealDamage(11);
     CommonPhysX.foeKnockback(this.gameObject.mouseAngle, obj2, this.force);
 
     // Apply Slow: add only once
-    const effect = this.components.findComponent(obj2, Effect);
-    if (!effect)
-      this.components.addComponent(obj2, new Effect(this.components));
+    if (!obj2.findComponent(Effect))
+      obj2.addComponent(new Effect());
 
     console.log(obj2.properties);
-    if (obj2.properties.hp <= 99) {
+    if (obj2.properties.hp <= 0) {
       this.components.removeAllComponents(obj2);
       obj2.destroy();
     }
