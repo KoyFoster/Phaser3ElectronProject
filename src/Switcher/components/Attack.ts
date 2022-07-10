@@ -3,36 +3,7 @@ import Phaser from "phaser";
 import IComponentService, { IComponent } from "../services/ComponentService";
 import StateMachine from "../statemachine/StateMachine";
 import { Damage } from "./Damage";
-
-// common physics calls
-function posPulse(
-  entity: Phaser.Types.Physics.Arcade.ImageWithDynamicBody,
-  direction: number,
-  speed: number
-) {
-  // send player backwards
-  const vel = entity.scene.physics.velocityFromRotation(direction, speed);
-  entity.setVelocity(
-    entity.body.velocity.x - vel.x,
-    entity.body.velocity.y - vel.y
-  );
-}
-
-function selfKnockback(
-  entity: Phaser.Types.Physics.Arcade.ImageWithDynamicBody,
-  force: number
-) {
-  // send player backwards
-  posPulse(entity, entity.body.angle, force);
-}
-
-function foeKnockback(
-  angle: number,
-  foe: Phaser.Types.Physics.Arcade.ImageWithDynamicBody,
-  force: number
-) {
-  posPulse(foe, angle - Math.PI, force);
-}
+import { CommonPhysX } from "./Utils/CommonPhysX";
 
 export class Attack implements IComponent {
   private cooldown = 500 as number;
@@ -143,7 +114,6 @@ export class Attack implements IComponent {
 
   update(dt: number) {
     this.stateMachine.update(dt);
-
     this.nameText.setPosition(this.gameObject.x, this.gameObject.y - 90);
   }
 
@@ -245,7 +215,7 @@ export class Attack implements IComponent {
     const comp = this.components.findComponent(obj2, Damage);
     if (comp) {
       comp.setState("damage");
-      foeKnockback(this.gameObject.mouseAngle, obj2, this.force);
+      CommonPhysX.foeKnockback(this.gameObject.mouseAngle, obj2, this.force);
       if (comp.getHP <= 0) {
         this.components.removeAllComponents(obj2);
         obj2.destroy();
@@ -263,6 +233,4 @@ export class Attack implements IComponent {
         this.stateMachine.setState("attack");
       });
   }
-
-  private handleClick() {}
 }

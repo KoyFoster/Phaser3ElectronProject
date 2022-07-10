@@ -136,7 +136,7 @@ export class Switcher extends Phaser.Scene {
     // collisions
     this.physics.add.collider(this.mobs, this.mobs);
     this.physics.add.collider(this.mobs, this.boundaries);
-    this.physics.add.collider(this.mobs, this.player);
+    // this.physics.add.collider(this.mobs, this.player);
     this.physics.add.collider(this.player, this.boundaries);
 
     // listeners
