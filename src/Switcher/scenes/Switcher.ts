@@ -1,6 +1,7 @@
 import Phaser, { Math as PMath } from "phaser";
 import { Attack } from "../components/Attack";
 import { Damage } from "../components/Damage";
+import { Entity } from "../components/Entity";
 import { Follow } from "../components/Follow";
 import { PlayerMovement } from "../components/PlayerMovement";
 import IComponentService from "../services/ComponentService";
@@ -28,7 +29,8 @@ function spawnAroundFrame(
     ) as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
     const comp = new Damage();
     components.addComponent(mob, comp);
-    components.addComponent(mob, new Follow(target));
+    components.addComponent(mob, new Entity());
+    components.addComponent(mob, new Follow(target, components));
   }
 }
 
@@ -113,7 +115,7 @@ export class Switcher extends Phaser.Scene {
       this.mobs,
       this.player,
       "bomb",
-      10,
+      1,
       0,
       this.components
     );

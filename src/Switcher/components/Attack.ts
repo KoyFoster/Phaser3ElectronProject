@@ -1,8 +1,8 @@
-import { Vector } from "matter";
 import Phaser from "phaser";
 import IComponentService, { IComponent } from "../services/ComponentService";
 import StateMachine from "../statemachine/StateMachine";
 import { Damage } from "./Damage";
+import { Effect } from "./Status/Effect";
 import { CommonPhysX } from "./Utils/CommonPhysX";
 
 export class Attack implements IComponent {
@@ -145,7 +145,6 @@ export class Attack implements IComponent {
       this.hitbox.rotation = angle + Math.PI * 0.5;
     }
 
-    console.log("dir:", dir);
     this.hitbox.setPosition(x + dir.x, y + dir.y);
     this.lElipse.setPosition(x - 64, y + 32);
     this.cdElipse.setPosition(x - 32, y + 32);
@@ -214,12 +213,18 @@ export class Attack implements IComponent {
   ) => {
     const comp = this.components.findComponent(obj2, Damage);
     if (comp) {
-      comp.setState("damage");
+      // comp.setState("damage");
       CommonPhysX.foeKnockback(this.gameObject.mouseAngle, obj2, this.force);
-      if (comp.getHP <= 0) {
-        this.components.removeAllComponents(obj2);
-        obj2.destroy();
-      }
+
+      // Apply Slow: add only once
+      const effect = this.components.findComponent(obj2, Effect);
+      if (!effect)
+        this.components.addComponent(obj2, new Effect(this.components));
+
+      // if (comp.getHP <= 0) {
+      //   this.components.removeAllComponents(obj2);
+      //   obj2.destroy();
+      // }
     }
   };
 
