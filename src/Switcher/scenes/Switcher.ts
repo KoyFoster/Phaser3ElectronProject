@@ -1,8 +1,10 @@
+import Phaser, { Math as PMath } from "phaser";
 import { Attack } from "../components/Attack";
 import { Damage } from "../components/Damage";
 import { Follow } from "../components/Follow";
 import { PlayerMovement } from "../components/PlayerMovement";
 import IComponentService from "../services/ComponentService";
+const { Between } = PMath.Angle;
 
 function spawnAroundFrame(
   width: number,
@@ -126,15 +128,31 @@ export class Switcher extends Phaser.Scene {
     const newAttack = new Attack("upswing", "swipe");
     this.components.addComponent(this.player, newAttack);
     newAttack.setMobs(this.mobs as Phaser.Physics.Arcade.Group);
-    newAttack.setInput(() => {
-      return this.cursors.space.isDown;
-    });
+    // newAttack.setkeyInput(() => {
+    //   return this.cursors.space.isDown;
+    // }, this);
+    newAttack.setMouseInput("pointerdown", this);
 
     // collisions
     this.physics.add.collider(this.mobs, this.mobs);
     this.physics.add.collider(this.mobs, this.boundaries);
     this.physics.add.collider(this.mobs, this.player);
     this.physics.add.collider(this.player, this.boundaries);
+
+    // listeners
+    window.addEventListener("mousemove", (e) => this.mouseMove(e));
+  }
+
+  destroy() {}
+
+  mouseMove(e) {
+    const { width, height } = this.sys.game.canvas;
+    let { x, y } = e;
+    const pos = { x, y };
+    const center = { x: width * 0.5, y: height * 0.5 };
+
+    // calculate angle from mouse position relative to the center of the screen
+    this.player.mouseAngle = Between(center.x, center.y, pos.x, pos.y);
   }
 
   update(t: number, dt: number) {

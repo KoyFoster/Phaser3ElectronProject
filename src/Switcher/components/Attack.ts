@@ -53,8 +53,10 @@ export class Attack implements IComponent {
   private cdElipse!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
   private lElipse!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
 
-  // input bind
-  private input?: () => boolean;
+  // input binds
+  private keyInput?: () => boolean;
+  private mouseInput?: string;
+  private inputContext?: Phaser.GameObjects.GameObject;
 
   // assets
   private sprite?: string;
@@ -147,7 +149,7 @@ export class Attack implements IComponent {
 
   offCoolDownEnter() {}
   offCoolDownUpdate() {
-    if (this.input && this.input()) {
+    if (this.keyInput && this.keyInput()) {
       this.stateMachine.setState("attack");
     }
   }
@@ -167,12 +169,10 @@ export class Attack implements IComponent {
     const x = this.gameObject.x;
     const y = this.gameObject.y;
     let dir = { x: 0, y: 0 };
-    if (this.gameObject.body.lastAngle !== undefined) {
-      dir = this.gameObject.scene.physics.velocityFromRotation(
-        this.gameObject.body.lastAngle,
-        60
-      );
-      this.hitbox.rotation = this.gameObject.body.lastAngle + Math.PI * 0.5;
+    const angle = this.gameObject.mouseAngle;
+    if (angle !== undefined) {
+      dir = this.gameObject.scene.physics.velocityFromRotation(angle, 60);
+      this.hitbox.rotation = angle + Math.PI * 0.5;
     }
 
     console.log("dir:", dir);
@@ -225,8 +225,15 @@ export class Attack implements IComponent {
     );
   }
 
-  setInput(input: () => boolean) {
-    this.input = input;
+  setkeyInput(keyInput: () => boolean) {
+    this.keyInput = keyInput;
+  }
+  setMouseInput(mouseInput: string, context: Phaser.GameObjects.GameObject) {
+    if (mouseInput) this.mouseInput = mouseInput;
+    this.inputContext = context;
+    context.input.on(mouseInput, () => {
+      this.stateMachine.setState("attack");
+    });
   }
 
   handleHit = (
@@ -238,7 +245,7 @@ export class Attack implements IComponent {
     const comp = this.components.findComponent(obj2, Damage);
     if (comp) {
       comp.setState("damage");
-      foeKnockback(this.gameObject.body.lastAngle, obj2, this.force);
+      foeKnockback(this.gameObject.mouseAngle, obj2, this.force);
       if (comp.getHP <= 0) {
         this.components.removeAllComponents(obj2);
         obj2.destroy();
@@ -250,7 +257,12 @@ export class Attack implements IComponent {
 
   start() {}
 
-  destroy() {}
+  destroy() {
+    if (this.inputContext && this.mouseInput)
+      this.inputContext.off(this.mouseInput, () => {
+        this.stateMachine.setState("attack");
+      });
+  }
 
   private handleClick() {}
 }

@@ -167,46 +167,6 @@ export default class AttackScene extends Phaser.Scene {
     }
   }
 
-  //   private entityAttackEnter() {
-  //     this.entity.play("attack");
-  //     this.entity.setVelocityX(0);
-
-  //     // TODO: move sword swing hitbox into place
-  //     // does it need to start part way into the animation?
-  //     const startHit = (
-  //       anim: Phaser.Animations.Animation,
-  //       frame: Phaser.Animations.AnimationFrame
-  //     ) => {
-  //       if (frame.index < 20) {
-  //         return;
-  //       }
-
-  //       this.entity.off(Phaser.Animations.Events.ANIMATION_UPDATE, startHit);
-
-  //       this.attackHitBox.x =
-  //         this.entity.x +
-  //         (this.entity.flipX ? -this.entity.width : this.entity.width);
-
-  //       this.attackHitBox.y = this.entity.y + this.entity.height * 0.2;
-
-  //       this.attackHitBox.body.enable = true;
-  //       this.physics.world.add(this.attackHitBox.body);
-  //     };
-
-  //     this.entity.on(Phaser.Animations.Events.ANIMATION_UPDATE, startHit);
-
-  //     this.entity.once(
-  //       Phaser.Animations.Events.ANIMATION_COMPLETE_KEY + "attack",
-  //       () => {
-  //         this.entityStateMachine.setState("idle");
-
-  //         // TODO: hide and remove the sword swing hitbox
-  //         this.attackHitBox.body.enable = false;
-  //         this.physics.world.remove(this.attackHitBox.body);
-  //       }
-  //     );
-  //   }
-
   private entityAttackEnter() {
     this.attackHitBox.x =
       this.entity.x +

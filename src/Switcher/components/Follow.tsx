@@ -33,23 +33,19 @@ export class Follow implements IComponent {
       target.body.position.x,
       target.body.position.y
     );
-    angle = angle * (180 / Math.PI);
 
-    const dir = self.scene.physics.velocityFromAngle(angle, this.speed);
+    const dir = self.scene.physics.velocityFromRotation(angle, this.speed);
     self.setVelocity(
       self.body.velocity.x + dir.x * dt,
       self.body.velocity.y + dir.y * dt
     );
   }
 
-  awake() {
-  }
+  awake() {}
 
-  start() {
-  }
+  start() {}
 
-  destroy() {
-  }
+  destroy() {}
 
   update(dt: number) {
     this.followPlayer(dt);
