@@ -1,4 +1,5 @@
 import Phaser, { Math as PMath, Scene } from "phaser";
+import { Attack } from "../components/Attack";
 import { Entity } from "../Entities/Entity";
 import { Player } from "../Entities/Player";
 import ComponentService from "../services/ComponentService";
@@ -26,12 +27,6 @@ function spawnAroundFrame(
     );
 
     group.add(mob);
-
-    const mob2 = group.create(
-      x > y ? x - padding : i ? width + padding : 0,
-      x > y ? (i ? height + padding : 0) : y - padding,
-      "bomb"
-    );
 
     mob.follow(target);
   }
@@ -104,12 +99,12 @@ export class Switcher extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys("W,A,S,D");
     this.player = new Player(this.cursors, this.keys, this, width * 0.5, height * 0.5, "dude");
+    this.mobs = this.physics.add.group();
+    this.player.addAttack(Attack, this.mobs, undefined);
 
     this.cameras.main.startFollow(this.player);
 
     // Spawn some mobs
-    this.mobs = this.physics.add.group();
-
     spawnAroundFrame(this, width, height, this.mobs, this.player as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, "bomb", 1, 0);
 
     this.mobs.add(new Entity(this, 500, 500, "bomb", 0));

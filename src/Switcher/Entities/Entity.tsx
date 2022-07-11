@@ -47,8 +47,8 @@ export class Entity extends Phaser.Physics.Arcade.Sprite {
     this.destroy = this.destruct;
   }
 
-  addComponent(component: IComponent) {
-    this.components.addComponent(this, component);
+  addComponent(component: IComponent): IComponent {
+    return this.components.addComponent(this, component);
   }
 
   removeComponent(component: IComponent) {

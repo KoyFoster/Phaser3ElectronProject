@@ -31,13 +31,20 @@ export class Player extends Entity {
     this.setDamping(true);
 
     // Add component
-    const newAttack = new Attack("upswing", "swipe");
-    this.components.addComponent(this, newAttack);
-    newAttack.setMouseInput("pointerdown", scene);
     this.components.addComponent(this, new PlayerMovement(cursors, keys));
 
     // listeners
     window.addEventListener("mousemove", (e) => this.mouseMove(e));
+  }
+
+  addAttack(attack: Attack, mobs: [], keyInput: () => boolean)
+  {
+    const newAttack =  this.components.addComponent(this, new Attack("upswing", "swipe"));
+    newAttack.setkeyInput = keyInput;
+    newAttack.setMobs(mobs);
+
+    // input
+    newAttack.setMouseInput("pointerdown", this.scene);
   }
 
   mouseMove(e) {

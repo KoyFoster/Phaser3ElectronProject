@@ -151,7 +151,6 @@ export class Attack implements IComponent {
 
   attackEnter() {
     if (!this.gameObject) return;
-
     this.hitbox.body.enable = true;
     this.hitbox.visible = true;
     this.gameObject.scene.physics.world.add(this.hitbox.body);
@@ -184,6 +183,7 @@ export class Attack implements IComponent {
 
   setMobs(mobs: Phaser.GameObjects.Image[]) {
     this.mobs = mobs;
+    console.log("go:", this.gameObject, mobs);
     this.gameObject.scene.physics.add.overlap(
       this.hitbox,
       this.mobs,
@@ -211,11 +211,14 @@ export class Attack implements IComponent {
   ) => {
     console.error("hit");
     obj2.dealDamage(11);
-    CommonPhysX.foeKnockback(this.gameObject.properties.faceAngle, obj2 as any, this.force);
+    CommonPhysX.foeKnockback(
+      this.gameObject.properties.faceAngle,
+      obj2 as any,
+      this.force
+    );
 
     // Apply Slow: add only once
-    if (!obj2.findComponent(Effect))
-      obj2.addComponent(new Effect());
+    if (!obj2.findComponent(Effect)) obj2.addComponent(new Effect());
 
     console.log(obj2.properties);
     if (obj2.properties.hp <= 0) {

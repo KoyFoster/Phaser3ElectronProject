@@ -34,7 +34,7 @@ export default class ComponentService implements IComponentsService {
   private componentsByGameObject = new Map<string, IComponent[]>();
   private queueForStart: IComponent[] = [];
 
-  addComponent(go: Phaser.GameObjects.GameObject, component: IComponent) {
+  addComponent(go: Phaser.GameObjects.GameObject, component: IComponent): IComponent {
     // give gameobjects unique names
     if (!go.name) {
       go.name = short.generate();
@@ -56,6 +56,8 @@ export default class ComponentService implements IComponentsService {
 
     if (component.awake) component.awake();
     if (component.start) this.queueForStart.push(component);
+
+    return component;
   }
 
   removeComponent(go: Phaser.GameObjects.GameObject, component: IComponent) {
