@@ -26,7 +26,7 @@ export class Attack implements IComponent {
   // input binds
   private keyInput?: () => boolean;
   private mouseInput?: string;
-  private inputContext?: Phaser.GameObjects.GameObject;
+  private inputContext?: Phaser.Scene;
 
   // assets
   private sprite?: string;
@@ -138,7 +138,7 @@ export class Attack implements IComponent {
     const x = this.gameObject.x;
     const y = this.gameObject.y;
     let dir = { x: 0, y: 0 };
-    const angle = this.gameObject.mouseAngle;
+    const angle = this.gameObject.properties.faceAngle;
     if (angle !== undefined) {
       dir = this.gameObject.scene.physics.velocityFromRotation(angle, 60);
       this.hitbox.rotation = angle + Math.PI * 0.5;
@@ -196,7 +196,7 @@ export class Attack implements IComponent {
   setkeyInput(keyInput: () => boolean) {
     this.keyInput = keyInput;
   }
-  setMouseInput(mouseInput: string, context: Phaser.GameObjects.GameObject) {
+  setMouseInput(mouseInput: string, context: Phaser.Scene) {
     if (mouseInput) this.mouseInput = mouseInput;
     this.inputContext = context;
     context.input.on(mouseInput, () => {
@@ -211,7 +211,7 @@ export class Attack implements IComponent {
   ) => {
     console.error("hit");
     obj2.dealDamage(11);
-    CommonPhysX.foeKnockback(this.gameObject.mouseAngle, obj2, this.force);
+    CommonPhysX.foeKnockback(this.gameObject.properties.faceAngle, obj2 as any, this.force);
 
     // Apply Slow: add only once
     if (!obj2.findComponent(Effect))
@@ -230,7 +230,7 @@ export class Attack implements IComponent {
 
   destroy() {
     if (this.inputContext && this.mouseInput)
-      this.inputContext.off(this.mouseInput, () => {
+      this.inputContext.input.off(this.mouseInput, () => {
         this.stateMachine.setState("attack");
       });
   }

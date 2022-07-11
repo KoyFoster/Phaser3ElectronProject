@@ -1,5 +1,5 @@
 import Phaser, { Math as PMath, Scene } from "phaser";
-import { Damage } from "../components/Damage";
+import { HP } from "../components/HP";
 import { Follow } from "../components/Follow";
 
 import { EntityProps, IEntityProps } from "../components/Properties/Entity";
@@ -11,12 +11,12 @@ import ComponentService, {
 
 // Inherit from gameobject
 export class Entity extends Phaser.Physics.Arcade.Sprite {
-  // Phaser.GameObjects.GameObject
-  private components!: IComponentsService;
-  private damage!: Damage;
-  public properties = { ...EntityProps } as IEntityProps;
   public d!: (fromScene?: boolean | undefined) => void;
-  public trash = false;
+  public properties = { ...EntityProps } as IEntityProps;
+
+  // Components
+  protected components!: IComponentsService;
+  private hp!: HP;
 
   constructor(
     scene: Phaser.Scene,
@@ -37,8 +37,8 @@ export class Entity extends Phaser.Physics.Arcade.Sprite {
     });
 
     // Add Components
-    this.damage = new Damage();
-    this.components.addComponent(this, this.damage);
+    this.hp = new HP();
+    this.components.addComponent(this, this.hp);
   }
 
   private extendDestroy() {
@@ -60,7 +60,7 @@ export class Entity extends Phaser.Physics.Arcade.Sprite {
   }
 
   dealDamage(value: number) {
-    this.damage.doDamage(value);
+    this.hp.doDamage(value);
   }
 
   follow(target: Phaser.GameObjects.GameObject) {
@@ -72,11 +72,7 @@ export class Entity extends Phaser.Physics.Arcade.Sprite {
   }
 
   destruct = (fromScene?: boolean | undefined) => {
-    if (this.trash) return;
-
-    console.log("destroy:", this.trash, this);
     this.components.removeAllComponents(this);
     this.d(fromScene);
-    this.trash = true;
   };
 }

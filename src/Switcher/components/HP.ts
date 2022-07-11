@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { IComponent } from "../services/ComponentService";
 import StateMachine from "../statemachine/StateMachine";
 
-export class Damage implements IComponent {
+export class HP implements IComponent {
   private gameObject!: Phaser.GameObjects.GameObject &
     Phaser.GameObjects.Components.Transform;
   private stateMachine!: StateMachine;

@@ -68,9 +68,6 @@ export default class Spawner implements IComponent
 
 		const star = scene.add.image(position.x, position.y, 'star')
 
-		// this.components.addComponent(star, new Countdown(3))
-		// this.components.addComponent(star, new Explosion(this.colliders))
-
 	}
 
 	private handleSpawnUpdate()

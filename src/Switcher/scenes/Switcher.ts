@@ -1,11 +1,7 @@
 import Phaser, { Math as PMath, Scene } from "phaser";
-import { Attack } from "../components/Attack";
-import { Damage } from "../components/Damage";
-import { Follow } from "../components/Follow";
-import { PlayerMovement } from "../components/PlayerMovement";
 import { Entity } from "../Entities/Entity";
+import { Player } from "../Entities/Player";
 import ComponentService from "../services/ComponentService";
-const { Between } = PMath.Angle;
 
 function spawnAroundFrame(
   context: Scene,
@@ -37,8 +33,6 @@ function spawnAroundFrame(
       "bomb"
     );
 
-    console.log("mob2:", mob2);
-
     mob.follow(target);
   }
 }
@@ -46,7 +40,7 @@ function spawnAroundFrame(
 export class Switcher extends Phaser.Scene {
   private components!: ComponentService;
   boundaries!: Phaser.Physics.Arcade.StaticGroup;
-  player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  player!: Player;
   mobs!: Phaser.Physics.Arcade.Group;
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   keys: any;
@@ -73,13 +67,13 @@ export class Switcher extends Phaser.Scene {
 
     // boundaries
     this.boundaries = this.physics.add.staticGroup();
-    // const tile = this.add.tileSprite(
-    //   width * 0.5,
-    //   height * 0.5,
-    //   width,
-    //   height,
-    //   "tile0"
-    // );
+    const tile = this.add.tileSprite(
+      width * 0.5,
+      height * 0.5,
+      width,
+      height,
+      "tile0"
+    );
     // frame
     const thiccness = 100;
     this.boundaries
@@ -99,9 +93,6 @@ export class Switcher extends Phaser.Scene {
       .setScale(thiccness, height)
       .refreshBody(); // Right
 
-    // listeners
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.keys = this.input.keyboard.addKeys("W,A,S,D");
 
     // score
     this.debugText = this.add.text(16, 16, "debugText: 0", {
@@ -109,61 +100,32 @@ export class Switcher extends Phaser.Scene {
       color: "#eeee00",
     });
 
-    this.player = this.physics.add.sprite(width * 0.5, height * 0.5, "dude");
-    this.player.setDrag(0.0001);
-    this.player.setDamping(true);
+    // listeners
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.keys = this.input.keyboard.addKeys("W,A,S,D");
+    this.player = new Player(this.cursors, this.keys, this, width * 0.5, height * 0.5, "dude");
 
     this.cameras.main.startFollow(this.player);
 
     // Spawn some mobs
     this.mobs = this.physics.add.group();
 
-    spawnAroundFrame(this, width, height, this.mobs, this.player, "bomb", 1, 0);
+    spawnAroundFrame(this, width, height, this.mobs, this.player as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, "bomb", 1, 0);
 
     this.mobs.add(new Entity(this, 500, 500, "bomb", 0));
-
-    // Add movement to player
-    this.components.addComponent(
-      this.player,
-      new PlayerMovement(this.cursors, this.keys)
-    );
-
-    // Set new attack
-    const newAttack = new Attack("upswing", "swipe");
-    this.components.addComponent(this.player, newAttack);
-    newAttack.setMobs(this.mobs);
-    // newAttack.setkeyInput(() => {
-    //   return this.cursors.space.isDown;
-    // }, this);
-    newAttack.setMouseInput("pointerdown", this);
 
     // collisions
     this.physics.add.collider(this.mobs, this.mobs);
     this.physics.add.collider(this.mobs, this.boundaries);
     // this.physics.add.collider(this.mobs, this.player);
     this.physics.add.collider(this.player, this.boundaries);
-
-    // listeners
-    window.addEventListener("mousemove", (e) => this.mouseMove(e));
-  }
-
-  mouseMove(e) {
-    const { width, height } = this.sys.game.canvas;
-    let { x, y } = e;
-    const pos = { x, y };
-    const center = { x: width * 0.5, y: height * 0.5 };
-
-    // calculate angle from mouse position relative to the center of the screen
-    this.player.mouseAngle = Between(center.x, center.y, pos.x, pos.y);
   }
 
   update(t: number, dt: number) {
-    this.debugText.text = `Vel: [${this.player.body.velocity.x}, ${this.player.body.velocity.y}],
-    Acc: [${this.player.body.acceleration.x}, ${this.player.body.acceleration.y}],
-    Angle: [${this.player.body.angle}]`;
-
     this.components.update(dt);
 
+    // update player
+    this.player.update(t, dt);
     // update mobs
     this.mobs.getChildren().forEach((element) => {
       element.update(t, dt);

@@ -3,6 +3,7 @@ export interface IEntityProps {
   baseSpeed: number;
   speed: number;
   hp: number;
+  faceAngle: number;
 }
 
 export const EntityProps = {
@@ -10,4 +11,5 @@ export const EntityProps = {
   baseSpeed: 1,
   speed: 1,
   hp: 100,
+  faceAngle: 0,
 } as IEntityProps;
