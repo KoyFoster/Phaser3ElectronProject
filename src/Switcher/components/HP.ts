@@ -55,7 +55,6 @@ export class HP implements IComponent {
   }
 
   private damageEnter() {
-    console.error("damage");
     this.gameObject.fillColor = 0xff0000;
 
     this.gameObject.properties.hp -= this.nextDmg;

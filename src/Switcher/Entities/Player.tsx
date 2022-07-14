@@ -19,7 +19,6 @@ export class Player extends Entity {
     texture: string | Phaser.Textures.Texture,
     frame?: string | number | undefined
   ) {
-    console.log("Player: ", { scene, x, y, texture, frame });
     super(scene, x, y, texture, frame);
     this.scene = scene;
     this.cursors = cursors;

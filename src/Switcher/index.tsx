@@ -1,9 +1,8 @@
 import Phaser, { Math as PMath } from "phaser";
-const { Vector2 } = PMath;
 import { StartupScene } from "./scenes/StartupScene";
-import { GameScene } from "./scenes/GameScene";
 import Preloader from "./scenes/preloader";
 import { Switcher } from "./scenes/Switcher";
+import HUD from "./scenes/HUD";
 
 const width = 1920 * 0.75;
 const height = 1080 * 0.75;
@@ -17,11 +16,10 @@ export const config = {
   physics: {
     default: "arcade",
     arcade: {
-      // gravity: { y: 300 },
       debug: true,
     },
   },
-  scene: [Preloader, Switcher, StartupScene, GameScene],
+  scene: [Preloader, StartupScene, Switcher, HUD],
 };
 
 export default new Phaser.Game(config);

@@ -183,7 +183,6 @@ export class Attack implements IComponent {
 
   setMobs(mobs: Phaser.GameObjects.Image[]) {
     this.mobs = mobs;
-    console.log("go:", this.gameObject, mobs);
     this.gameObject.scene.physics.add.overlap(
       this.hitbox,
       this.mobs,
@@ -209,7 +208,6 @@ export class Attack implements IComponent {
       Phaser.GameObjects.Components.Transform,
     obj2: Entity
   ) => {
-    console.error("hit");
     obj2.dealDamage(11);
     CommonPhysX.foeKnockback(
       this.gameObject.properties.faceAngle,
@@ -220,7 +218,6 @@ export class Attack implements IComponent {
     // Apply Slow: add only once
     if (!obj2.findComponent(Effect)) obj2.addComponent(new Effect());
 
-    console.log(obj2.properties);
     if (obj2.properties.hp <= 0) {
       this.components.removeAllComponents(obj2);
       obj2.destroy();

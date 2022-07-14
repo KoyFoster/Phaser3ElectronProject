@@ -17,7 +17,6 @@ export class Follow implements IComponent {
   init(go: Phaser.GameObjects.GameObject) {
     this.gameObject = go;
 
-    console.log('gameObject:', this.gameObject);
     const entity = this
       .gameObject as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
     entity.setDrag(0.0001) as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;

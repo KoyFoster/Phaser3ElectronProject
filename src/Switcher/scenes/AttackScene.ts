@@ -117,7 +117,6 @@ export default class AttackScene extends Phaser.Scene {
     obj1: Phaser.GameObjects.GameObject,
     obj2: Phaser.GameObjects.GameObject
   ) {
-    console.error("hit");
     this.boxStateMachine.setState("damage");
   }
 

@@ -48,7 +48,6 @@ export default class ComponentService implements IComponentsService {
     // add newcomponent to this gameobjects's list
     const list = this.componentsByGameObject.get(go.name) as IComponent[];
 
-    console.warn("add component:", component);
     list.push(component);
 
     // call the lifecycle hooks
@@ -70,7 +69,7 @@ export default class ComponentService implements IComponentsService {
     }
 
     const list = this.componentsByGameObject.get(go.name) as IComponent[];
-    // console.log("comp list:", list);
+
     const index = list.findIndex((comp) => comp === component);
 
     if (index < 0) {
@@ -79,9 +78,7 @@ export default class ComponentService implements IComponentsService {
 
     list.splice(index, 1);
 
-    console.error("destroy:", component);
     component.destroy?.();
-    // console.error("componentsByGameObject:", this.componentsByGameObject);
   }
 
   removeAllComponents(go: Phaser.GameObjects.GameObject) {
@@ -89,7 +86,6 @@ export default class ComponentService implements IComponentsService {
       const components = this.componentsByGameObject.get(go.name) ?? [];
 
       components.forEach((component) => {
-        console.warn("delete:", component);
         component.destroy?.();
       });
     }

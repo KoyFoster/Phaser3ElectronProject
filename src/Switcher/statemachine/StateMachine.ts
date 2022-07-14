@@ -61,7 +61,6 @@ export default class StateMachine
 
 	setState(name: string)
 	{
-		// console.warn('setState:', name)
 		if (!this.states.has(name))
 		{
 			return

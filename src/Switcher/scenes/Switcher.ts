@@ -114,6 +114,9 @@ export class Switcher extends Phaser.Scene {
     this.physics.add.collider(this.mobs, this.boundaries);
     // this.physics.add.collider(this.mobs, this.player);
     this.physics.add.collider(this.player, this.boundaries);
+
+    // Launch HUD
+    this.scene.launch("hud", {ass: 'ass'});
   }
 
   update(t: number, dt: number) {

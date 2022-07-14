@@ -25,7 +25,6 @@ export class Entity extends Phaser.Physics.Arcade.Sprite {
     texture: string | Phaser.Textures.Texture,
     frame?: string | number | undefined
   ) {
-    console.log("Entity: ", { scene, x, y, texture, frame });
     super(scene, x, y, texture, frame);
     scene.add.existing(this);
     this.extendDestroy();
