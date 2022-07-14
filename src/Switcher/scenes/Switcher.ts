@@ -39,6 +39,11 @@ export class Switcher extends Phaser.Scene {
   mobs!: Phaser.Physics.Arcade.Group;
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   keys: any;
+  hudData = {
+    health: 100,
+    attacks: [],
+    stats: { STR: 0 },
+  };
 
   score = 0;
   debugText!: Phaser.GameObjects.Text;
@@ -88,24 +93,40 @@ export class Switcher extends Phaser.Scene {
       .setScale(thiccness, height)
       .refreshBody(); // Right
 
-
     // score
-    this.debugText = this.add.text(16, 16, "debugText: 0", {
-      fontSize: "32px",
-      color: "#eeee00",
-    });
+    // this.debugText = this.add.text(16, 16, "debugText: 0", {
+    //   fontSize: "32px",
+    //   color: "#eeee00",
+    // });
 
     // listeners
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys("W,A,S,D");
-    this.player = new Player(this.cursors, this.keys, this, width * 0.5, height * 0.5, "dude");
+    this.player = new Player(
+      this.cursors,
+      this.keys,
+      this,
+      width * 0.5,
+      height * 0.5,
+      "dude"
+    );
     this.mobs = this.physics.add.group();
     this.player.addAttack(Attack, this.mobs, undefined);
+    this.hudData.attacks.push("Basic");
 
     this.cameras.main.startFollow(this.player);
 
     // Spawn some mobs
-    spawnAroundFrame(this, width, height, this.mobs, this.player as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, "bomb", 1, 0);
+    spawnAroundFrame(
+      this,
+      width,
+      height,
+      this.mobs,
+      this.player as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+      "bomb",
+      1,
+      0
+    );
 
     this.mobs.add(new Entity(this, 500, 500, "bomb", 0));
 
@@ -116,7 +137,7 @@ export class Switcher extends Phaser.Scene {
     this.physics.add.collider(this.player, this.boundaries);
 
     // Launch HUD
-    this.scene.launch("hud", {ass: 'ass'});
+    this.scene.launch("hud", this.hudData);
   }
 
   update(t: number, dt: number) {
@@ -128,6 +149,10 @@ export class Switcher extends Phaser.Scene {
     this.mobs.getChildren().forEach((element) => {
       element.update(t, dt);
     });
+
+    // Test HUD Data updating
+    // this.hudData.health -= Math.round(dt);
+    // this.hudData.stats.STR += Math.round(dt);
   }
 
   destroy() {}
