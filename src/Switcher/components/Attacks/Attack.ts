@@ -117,7 +117,6 @@ export class Attack implements IComponent {
 
   offCoolDownEnter() {}
   offCoolDownUpdate() {
-    console.log('offCoolDownUpdate:', this.input);
     if (this.input && this.input()) {
       this.stateMachine.setState("attack");
     }

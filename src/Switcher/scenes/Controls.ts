@@ -224,25 +224,22 @@ export default class Controls extends Phaser.Scene {
     super("controls");
 
     this.input;
+    // get inputs
+    const keys = Object.keys(Mappings);
+    keys.map((key) => (this.macros[key] = this.getBind(Mappings[key])));
   }
 
   preload() {}
 
-  init(data: {}) {
-    // get inputs
-    const keys = Object.keys(Mappings);
-    keys.map((key) => (this.macros[key] = this.getBind(Mappings[key])));
-    console.log("macros:", this.macros, keys);
-  }
+  init(data: {}) {}
 
   getBind(mapping: string[]): () => boolean {
-    console.log("getBind", { mapping });
-
     return () => {
-      console.log("input", { mapping });
       for (let i = 0; i < mapping.length; i += 1) {
-        if (this.inputs[mapping[i]] === true) return false;
-        return true;
+        if (this.inputs[mapping[i]] === true) {
+          console.log(`[${mapping}] =>`, this.inputs[mapping[i]]);
+          return true;
+        }
       }
       return false;
     };
