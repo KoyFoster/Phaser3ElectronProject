@@ -1,8 +1,10 @@
 import Phaser, { Math as PMath, Scene } from "phaser";
-import { Attack } from "../components/Attack";
+import { Attack } from "../components/Attacks/Attack";
+import { Empty } from "../components/Attacks/Empty";
 import { Entity } from "../Entities/Entity";
 import { Player } from "../Entities/Player";
 import ComponentService from "../services/ComponentService";
+import Controls from "./Controls";
 
 function spawnAroundFrame(
   context: Scene,
@@ -44,6 +46,7 @@ export class Switcher extends Phaser.Scene {
     attacks: [],
     stats: { STR: 0 },
   };
+  controls!: Controls;
 
   score = 0;
   debugText!: Phaser.GameObjects.Text;
@@ -93,12 +96,6 @@ export class Switcher extends Phaser.Scene {
       .setScale(thiccness, height)
       .refreshBody(); // Right
 
-    // score
-    // this.debugText = this.add.text(16, 16, "debugText: 0", {
-    //   fontSize: "32px",
-    //   color: "#eeee00",
-    // });
-
     // listeners
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys("W,A,S,D");
@@ -111,8 +108,12 @@ export class Switcher extends Phaser.Scene {
       "dude"
     );
     this.mobs = this.physics.add.group();
-    this.player.addAttack(Attack, this.mobs, undefined);
+
+    this.player.addAttack(Attack, this.mobs, "pointerdown");
     this.hudData.attacks.push("Basic");
+
+    this.player.addAttack(Empty, this.mobs, undefined);
+    this.hudData.attacks.push("Empty");
 
     this.cameras.main.startFollow(this.player);
 
@@ -138,9 +139,14 @@ export class Switcher extends Phaser.Scene {
 
     // Launch HUD
     this.scene.launch("hud", this.hudData);
+    this.scene.launch("controls", {});
+    this.controls = this.scene.get("controls") as Controls;
   }
 
   update(t: number, dt: number) {
+    // update inputs
+    console.log("inputs:", this.controls.getInputs());
+
     this.components.update(dt);
 
     // update player

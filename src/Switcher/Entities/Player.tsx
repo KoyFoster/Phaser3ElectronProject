@@ -1,6 +1,6 @@
 import Phaser, { Math as PMath, Scene } from "phaser";
 const { Between } = PMath.Angle;
-import { Attack } from "../components/Attack";
+import { Attack } from "../components/Attacks/Attack";
 import { PlayerMovement } from "../components/PlayerMovement";
 import { Entity } from "./Entity";
 
@@ -36,14 +36,22 @@ export class Player extends Entity {
     window.addEventListener("mousemove", (e) => this.mouseMove(e));
   }
 
-  addAttack(attack: Attack, mobs: [], keyInput: () => boolean)
-  {
-    const newAttack =  this.components.addComponent(this, new Attack("upswing", "swipe"));
-    newAttack.setkeyInput = keyInput;
+  addAttack(
+    attack: Attack,
+    mobs: [],
+    mouseInput?: string,
+    keyInput?: () => boolean
+  ) {
+    const newAttack = this.components.addComponent(
+      this,
+      new Attack()
+    );
+    // mouse
+    if (keyInput) newAttack.setkeyInput = keyInput;
+    // key
+    if (mouseInput) newAttack.setMouseInput(mouseInput, this.scene);
+    // define mobs
     newAttack.setMobs(mobs);
-
-    // input
-    newAttack.setMouseInput("pointerdown", this.scene);
   }
 
   mouseMove(e) {

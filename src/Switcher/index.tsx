@@ -3,6 +3,7 @@ import { StartupScene } from "./scenes/StartupScene";
 import Preloader from "./scenes/preloader";
 import { Switcher } from "./scenes/Switcher";
 import HUD from "./scenes/HUD";
+import Controls from "./scenes/Controls";
 
 const width = 1920 * 0.75;
 const height = 1080 * 0.75;
@@ -19,7 +20,7 @@ export const config = {
       debug: true,
     },
   },
-  scene: [Preloader, StartupScene, Switcher, HUD],
+  scene: [Preloader, StartupScene, Switcher, HUD, Controls],
 };
 
 export default new Phaser.Game(config);

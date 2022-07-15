@@ -1,55 +1,55 @@
 import Phaser from "phaser";
-import { Entity } from "../Entities/Entity";
-import ComponentService, { IComponent } from "../services/ComponentService";
-import StateMachine from "../statemachine/StateMachine";
-import { Effect } from "./Status/Effect";
-import { CommonPhysX } from "./Utils/CommonPhysX";
+import { Entity } from "../../Entities/Entity";
+import ComponentService, { IComponent } from "../../services/ComponentService";
+import StateMachine from "../../statemachine/StateMachine";
+import { Effect } from "../Status/Effect";
+import { CommonPhysX } from "../Utils/CommonPhysX";
 
 export class Attack implements IComponent {
-  private cooldown = 500 as number;
-  private cdTimer = 0 as number;
-  private linger = 250 as number;
-  private lTimer = 0 as number;
+  protected cooldown = 500 as number;
+  protected cdTimer = 0 as number;
+  protected linger = 250 as number;
+  protected lTimer = 0 as number;
 
-  private force = 500 as number;
+  protected force = 500 as number;
 
-  private components!: ComponentService;
-  private gameObject!: Entity;
-  private stateMachine!: StateMachine;
+  protected components!: ComponentService;
+  protected gameObject!: Entity;
+  protected stateMachine!: StateMachine;
 
-  private hitbox!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-  private mobs?: Phaser.GameObjects.Image[] | Phaser.Physics.Arcade.Group;
+  protected hitbox!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+  protected mobs?: Phaser.GameObjects.Image[] | Phaser.Physics.Arcade.Group;
 
-  private cdElipse!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-  private lElipse!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+  protected cdElipse!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+  protected lElipse!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
 
   // input binds
-  private keyInput?: () => boolean;
-  private mouseInput?: string;
-  private inputContext?: Phaser.Scene;
+  protected keyInput?: () => boolean;
+  protected mouseInput?: string;
+  protected inputContext?: Phaser.Scene;
 
   // assets
-  private sprite?: string;
-  private fx?: string;
+  protected sprite?: string;
+  protected fx?: string;
 
   // Text
-  private nameText!: Phaser.GameObjects.Text;
-  private name = "Basic Attack";
+  protected nameText!: Phaser.GameObjects.Text;
+  protected name = "Basic Attack";
 
   // this may be creating a new instance of components
   init(
     go: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform,
     components: ComponentService
   ) {
+    this.sprite = "upswing";
+    this.fx = "swipe";
+
     this.gameObject = go as Entity;
     this.components = components;
     this.create();
   }
 
-  constructor(sprite?: string, fx?: string) {
-    this.sprite = sprite;
-    this.fx = fx;
-  }
+  constructor() {}
 
   create() {
     const { scene } = this.gameObject;
@@ -195,9 +195,11 @@ export class Attack implements IComponent {
   setkeyInput(keyInput: () => boolean) {
     this.keyInput = keyInput;
   }
+
   setMouseInput(mouseInput: string, context: Phaser.Scene) {
     if (mouseInput) this.mouseInput = mouseInput;
     this.inputContext = context;
+
     context.input.on(mouseInput, () => {
       this.stateMachine.setState("attack");
     });

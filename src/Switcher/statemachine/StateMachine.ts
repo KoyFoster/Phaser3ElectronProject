@@ -1,111 +1,105 @@
-interface StateConfig
-{
-	name: string
-	onEnter?: () => void
-	onUpdate?: (dt: number) => void
-	onExit?: () => void
+interface StateConfig {
+  name: string;
+  onEnter?: () => void;
+  onUpdate?: (dt: number) => void;
+  onExit?: () => void;
 }
 
-let idCount = 0
+let idCount = 0;
 
-export default class StateMachine
-{
-	private id = (++idCount).toString()
-	private context?: object
-	private states = new Map<string, StateConfig>()
+export default class StateMachine {
+  private id = (++idCount).toString();
+  private context?: object;
+  private states = new Map<string, StateConfig>();
 
-	private previousState?: StateConfig
-	private currentState?: StateConfig
-	private isChangingState = false
-	private changeStateQueue: string[] = []
+  private previousState?: StateConfig;
+  private currentState?: StateConfig;
+  private isChangingState = false;
+  private changeStateQueue: string[] = [];
 
-	get previousStateName()
-	{
-		if (!this.previousState)
-		{
-			return ''
-		}
+  get previousStateName() {
+    if (!this.previousState) {
+      return "";
+    }
 
-		return this.previousState.name
-	}
+    return this.previousState.name;
+  }
 
-	constructor(context?: object, id?: string)
-	{
-		this.id = id ?? this.id
-		this.context = context
-	}
+  constructor(context?: object, id?: string) {
+    this.id = id ?? this.id;
+    this.context = context;
+  }
 
-	isCurrentState(name: string)
-	{
-		if (!this.currentState)
-		{
-			return false
-		}
+  setID(id?: string) {
+    this.id = id ?? this.id;
+  }
 
-		return this.currentState.name === name
-	}
+  isCurrentState(name: string) {
+    if (!this.currentState) {
+      return false;
+    }
 
-	addState(name: string, config?: { onEnter?: () => void, onUpdate?: (dt: number) => void, onExit?: () => void })
-	{
-		const context = this.context
+    return this.currentState.name === name;
+  }
 
-		this.states.set(name, {
-			name,
-			onEnter: config?.onEnter?.bind(context),
-			onUpdate: config?.onUpdate?.bind(context),
-			onExit: config?.onExit?.bind(context)
-		})
+  addState(
+    name: string,
+    config?: {
+      onEnter?: () => void;
+      onUpdate?: (dt: number) => void;
+      onExit?: () => void;
+    }
+  ) {
+    const context = this.context;
 
-		return this
-	}
+    this.states.set(name, {
+      name,
+      onEnter: config?.onEnter?.bind(context),
+      onUpdate: config?.onUpdate?.bind(context),
+      onExit: config?.onExit?.bind(context),
+    });
 
-	setState(name: string)
-	{
-		if (!this.states.has(name))
-		{
-			return
-		}
+    return this;
+  }
 
-		if (this.isCurrentState(name))
-		{
-			return
-		}
+  setState(name: string) {
+    if (!this.states.has(name)) {
+      return;
+    }
 
-		if (this.isChangingState)
-		{
-			this.changeStateQueue.push(name)
-			return
-		}
+    if (this.isCurrentState(name)) {
+      return;
+    }
 
-		this.isChangingState = true
+    if (this.isChangingState) {
+      this.changeStateQueue.push(name);
+      return;
+    }
 
-		if (this.currentState && this.currentState.onExit)
-		{
-			this.currentState.onExit()
-		}
+    this.isChangingState = true;
 
-		this.previousState = this.currentState
-		this.currentState = this.states.get(name)!
+    if (this.currentState && this.currentState.onExit) {
+      this.currentState.onExit();
+    }
 
-		if (this.currentState.onEnter)
-		{
-			this.currentState.onEnter()
-		}
+    this.previousState = this.currentState;
+    this.currentState = this.states.get(name)!;
 
-		this.isChangingState = false
-	}
+    if (this.currentState.onEnter) {
+      this.currentState.onEnter();
+    }
 
-	update(dt: number)
-	{
-		if (this.changeStateQueue.length > 0)
-		{
-			this.setState(this.changeStateQueue.shift()!)
-			return
-		}
+    this.isChangingState = false;
+  }
 
-		if (this.currentState && this.currentState.onUpdate)
-		{
-			this.currentState.onUpdate(dt)
-		}
-	}
+  update(dt: number) {
+    if (this.changeStateQueue.length > 0) {
+      this.setState(this.changeStateQueue.shift()!);
+      return;
+    }
+
+    if (this.currentState && this.currentState.onUpdate) {
+      this.currentState.onUpdate(dt);
+    }
+  }
 }
