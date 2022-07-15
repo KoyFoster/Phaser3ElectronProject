@@ -19,6 +19,10 @@ export class Attack implements IComponent {
 
   protected hitbox!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
   protected mobs?: Phaser.GameObjects.Image[] | Phaser.Physics.Arcade.Group;
+  // Possibly track list of hit entities so that that don't get hit multiple times
+  protected hitMobs = [] as
+    | Phaser.GameObjects.Image[]
+    | Phaser.Physics.Arcade.Group;
 
   protected cdElipse!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
   protected lElipse!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
@@ -36,7 +40,7 @@ export class Attack implements IComponent {
   protected name = "Basic Attack";
 
   // this may be creating a new instance of components
-  init(
+  protected init(
     go: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform,
     components: ComponentService
   ) {
@@ -122,7 +126,9 @@ export class Attack implements IComponent {
     }
   }
 
-  onCoolDownEnter() {}
+  onCoolDownEnter() {
+    this.hitMobs = [];
+  }
   onCoolDownUpdate(dt: number) {
     this.cdTimer += dt;
     if (this.cdTimer >= this.cooldown) {
@@ -200,16 +206,20 @@ export class Attack implements IComponent {
       Phaser.GameObjects.Components.Transform,
     obj2: Entity
   ) => {
+    // check if obj is also hit
+    if (this.hitMobs.includes(obj2)) return;
+
+    // add mob to hit list, then release when weapon goes on cooldown
+    this.hitMobs.push(obj2);
+
     obj2.dealDamage(11);
     CommonPhysX.foeKnockback(
       this.gameObject.properties.faceAngle,
       obj2 as any,
       this.force
     );
-
     // Apply Slow: add only once
     if (!obj2.findComponent(Effect)) obj2.addComponent(new Effect());
-
     if (obj2.properties.hp <= 0) {
       this.components.removeAllComponents(obj2);
       obj2.destroy();

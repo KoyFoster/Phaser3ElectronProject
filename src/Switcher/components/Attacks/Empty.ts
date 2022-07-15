@@ -7,26 +7,44 @@ import { CommonPhysX } from "../Utils/CommonPhysX";
 import { Attack } from "./Attack";
 
 export class Empty extends Attack {
-  constructor(sprite?: string, fx?: string) {
-    super(sprite, fx);
-    this.stateMachine.setID("Enpty");
+  constructor() {
+    super();
+    this.extendInit();
+  }
+
+  // attackUpdate(dt: number) {}
+  // setkeyInput(keyInput: () => boolean) {}
+  // setMouseInput(mouseInput: string, context: Phaser.Scene) {}
+
+  // Remapping init so that we can add to it
+  private extendInit() {
+    // extend destroy
+    this.i = this.init;
+    this.init = this.initialize;
+  }
+  i(
+    go: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform,
+    components: ComponentService
+  ) {}
+  initialize(
+    go: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Transform,
+    components: ComponentService
+  ) {
+    this.i(go, components);
+
+   //  this.stateMachine.setID("Empty");
     this.force = 1000;
   }
 
-  attackUpdate(dt: number) {}
+  // handleHit = (
+  //   obj1: Phaser.GameObjects.GameObject &
+  //     Phaser.GameObjects.Components.Transform,
+  //   obj2: Entity
+  // ) => {};
 
-  setkeyInput(keyInput: () => boolean) {}
-  setMouseInput(mouseInput: string, context: Phaser.Scene) {}
+  // awake() {}
 
-  handleHit = (
-    obj1: Phaser.GameObjects.GameObject &
-      Phaser.GameObjects.Components.Transform,
-    obj2: Entity
-  ) => {};
+  // start() {}
 
-  awake() {}
-
-  start() {}
-
-  destroy() {}
+  // destroy() {}
 }

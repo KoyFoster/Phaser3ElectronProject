@@ -37,10 +37,10 @@ export class Player extends Entity {
   }
 
   addAttack(attack: Attack, mobs: [], input?: () => boolean) {
-    const newAttack = new Attack();
-    if (input) newAttack.setInput(input);
-    this.components.addComponent(this, newAttack);
-    newAttack.setMobs(mobs);
+    if (input) attack.setInput(input);
+    this.components.addComponent(this, attack);
+    attack.setMobs(mobs);
+    return attack;
   }
 
   mouseMove(e) {

@@ -116,11 +116,11 @@ export class Switcher extends Phaser.Scene {
     this.mobs = this.physics.add.group();
 
     console.log("getMacros:", this.controls.getMacros());
-    this.player.addAttack(Attack, this.mobs, this.controls.getMacros().primary);
+    this.player.addAttack(new Attack(), this.mobs, this.controls.getMacros().primary);
     this.hudData.attacks.push("Basic");
 
     this.player.addAttack(
-      Empty,
+      new Empty(),
       this.mobs,
       this.controls.getMacros().secondary
     );
