@@ -36,21 +36,10 @@ export class Player extends Entity {
     window.addEventListener("mousemove", (e) => this.mouseMove(e));
   }
 
-  addAttack(
-    attack: Attack,
-    mobs: [],
-    mouseInput?: string,
-    keyInput?: () => boolean
-  ) {
-    const newAttack = this.components.addComponent(
-      this,
-      new Attack()
-    );
-    // mouse
-    if (keyInput) newAttack.setkeyInput = keyInput;
-    // key
-    if (mouseInput) newAttack.setMouseInput(mouseInput, this.scene);
-    // define mobs
+  addAttack(attack: Attack, mobs: [], input?: () => boolean) {
+    const newAttack = new Attack();
+    if (input) newAttack.setInput(input);
+    this.components.addComponent(this, newAttack);
     newAttack.setMobs(mobs);
   }
 

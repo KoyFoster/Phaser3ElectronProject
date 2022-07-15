@@ -24,8 +24,7 @@ export class Attack implements IComponent {
   protected lElipse!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
 
   // input binds
-  protected keyInput?: () => boolean;
-  protected mouseInput?: string;
+  protected input?: () => boolean;
   protected inputContext?: Phaser.Scene;
 
   // assets
@@ -118,7 +117,8 @@ export class Attack implements IComponent {
 
   offCoolDownEnter() {}
   offCoolDownUpdate() {
-    if (this.keyInput && this.keyInput()) {
+    console.log('offCoolDownUpdate:', this.input);
+    if (this.input && this.input()) {
       this.stateMachine.setState("attack");
     }
   }
@@ -192,17 +192,8 @@ export class Attack implements IComponent {
     );
   }
 
-  setkeyInput(keyInput: () => boolean) {
-    this.keyInput = keyInput;
-  }
-
-  setMouseInput(mouseInput: string, context: Phaser.Scene) {
-    if (mouseInput) this.mouseInput = mouseInput;
-    this.inputContext = context;
-
-    context.input.on(mouseInput, () => {
-      this.stateMachine.setState("attack");
-    });
+  public setInput(input: () => boolean) {
+    this.input = input;
   }
 
   handleHit = (
@@ -230,10 +221,5 @@ export class Attack implements IComponent {
 
   start() {}
 
-  destroy() {
-    if (this.inputContext && this.mouseInput)
-      this.inputContext.input.off(this.mouseInput, () => {
-        this.stateMachine.setState("attack");
-      });
-  }
+  destroy() {}
 }

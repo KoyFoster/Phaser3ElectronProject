@@ -59,6 +59,7 @@ export class Switcher extends Phaser.Scene {
   preload() {}
 
   init() {
+    console.warn("init");
     this.components = new ComponentService();
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.components.destroy();
@@ -66,6 +67,11 @@ export class Switcher extends Phaser.Scene {
   }
 
   create() {
+    console.warn("create");
+    // Launch Controls scene
+    this.scene.launch("controls", {});
+    this.controls = this.scene.get("controls") as Controls;
+
     const { width, height } = this.sys.game.canvas;
 
     // boundaries
@@ -109,10 +115,15 @@ export class Switcher extends Phaser.Scene {
     );
     this.mobs = this.physics.add.group();
 
-    this.player.addAttack(Attack, this.mobs, "pointerdown");
+    console.log("getMacros:", this.controls.getMacros());
+    this.player.addAttack(Attack, this.mobs, this.controls.getMacros().primary);
     this.hudData.attacks.push("Basic");
 
-    this.player.addAttack(Empty, this.mobs, undefined);
+    this.player.addAttack(
+      Empty,
+      this.mobs,
+      this.controls.getMacros().secondary
+    );
     this.hudData.attacks.push("Empty");
 
     this.cameras.main.startFollow(this.player);
@@ -139,13 +150,13 @@ export class Switcher extends Phaser.Scene {
 
     // Launch HUD
     this.scene.launch("hud", this.hudData);
-    this.scene.launch("controls", {});
-    this.controls = this.scene.get("controls") as Controls;
+
+    console.log('end of create');
   }
 
   update(t: number, dt: number) {
     // update inputs
-    console.log("inputs:", this.controls.getInputs());
+    // console.log("inputs:", this.controls.getInputs());
 
     this.components.update(dt);
 
