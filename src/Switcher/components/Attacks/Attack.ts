@@ -2,7 +2,6 @@ import Phaser from "phaser";
 import { Entity } from "../../Entities/Entity";
 import ComponentService, { IComponent } from "../../services/ComponentService";
 import StateMachine from "../../statemachine/StateMachine";
-import { Effect } from "../Status/Effect";
 import { CommonPhysX } from "../Utils/CommonPhysX";
 
 export class Attack implements IComponent {
@@ -10,8 +9,7 @@ export class Attack implements IComponent {
   protected cdTimer = 0 as number;
   protected linger = 250 as number;
   protected lTimer = 0 as number;
-
-  protected force = 500 as number;
+  protected force = 1500 as number;
 
   protected components!: ComponentService;
   protected gameObject!: Entity;
@@ -218,8 +216,6 @@ export class Attack implements IComponent {
       obj2 as any,
       this.force
     );
-    // Apply Slow: add only once
-    if (!obj2.findComponent(Effect)) obj2.addComponent(new Effect());
     if (obj2.properties.hp <= 0) {
       this.components.removeAllComponents(obj2);
       obj2.destroy();

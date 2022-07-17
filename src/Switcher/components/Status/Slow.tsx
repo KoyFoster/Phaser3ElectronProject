@@ -5,12 +5,12 @@ import {
   IComponentsService,
 } from "../../services/ComponentService";
 
-export class Effect implements IComponent {
-  protected gameObject!: Entity;
-  protected lifeTime = 200 as number;
-  protected timer = 0 as number;
-  protected mod = 0.75 as number;
-  protected modValue?: number;
+export class Slow implements IComponent {
+  private gameObject!: Entity;
+  private lifeTime = 1000 as number;
+  private timer = 0 as number;
+  private mod = 0.75 as number;
+  private modValue?: number;
 
   init(go: Phaser.GameObjects.GameObject) {
     this.gameObject = go as Entity;

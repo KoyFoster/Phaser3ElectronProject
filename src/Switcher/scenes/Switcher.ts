@@ -1,6 +1,8 @@
 import Phaser, { Math as PMath, Scene } from "phaser";
 import { Attack } from "../components/Attacks/Attack";
+import { ColdWave } from "../components/Attacks/ColdWave";
 import { Empty } from "../components/Attacks/Empty";
+import { Launch } from "../components/Attacks/Launch";
 import { Entity } from "../Entities/Entity";
 import { Player } from "../Entities/Player";
 import ComponentService from "../services/ComponentService";
@@ -116,11 +118,11 @@ export class Switcher extends Phaser.Scene {
     this.mobs = this.physics.add.group();
 
     console.log("getMacros:", this.controls.getMacros());
-    this.player.addAttack(new Attack(), this.mobs, this.controls.getMacros().primary);
+    this.player.addAttack(new ColdWave(), this.mobs, this.controls.getMacros().primary);
     this.hudData.attacks.push("Basic");
 
     this.player.addAttack(
-      new Empty(),
+      new Launch(),
       this.mobs,
       this.controls.getMacros().secondary
     );
@@ -136,7 +138,7 @@ export class Switcher extends Phaser.Scene {
       this.mobs,
       this.player as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
       "bomb",
-      1,
+      50,
       0
     );
 

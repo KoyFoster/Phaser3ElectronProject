@@ -21,9 +21,9 @@ export class HP implements IComponent {
   }
 
   create() {
-    this.hpText = this.gameObject.scene.add
-      .text(this.gameObject.x, this.gameObject.y - 90, `HP: ${this.getHP}`)
-      .setOrigin(0.5);
+    // this.hpText = this.gameObject.scene.add
+    //   .text(this.gameObject.x, this.gameObject.y - 90, `HP: ${this.getHP}`)
+    //   .setOrigin(0.5);
 
     this.stateMachine = new StateMachine(this, `${this.gameObject.name} damage`)
       .addState("idle", {
@@ -38,7 +38,7 @@ export class HP implements IComponent {
   update(dt: number) {
     this.stateMachine.update(dt);
 
-    this.hpText.setPosition(this.gameObject.x, this.gameObject.y - 90);
+    // this.hpText.setPosition(this.gameObject.x, this.gameObject.y - 90);
   }
 
   idleEnter() {
@@ -59,7 +59,7 @@ export class HP implements IComponent {
 
     this.gameObject.properties.hp -= this.nextDmg;
     this.nextDmg = 0;
-    this.hpText.text = `HP: ${this.getHP}`;
+    // this.hpText.text = `HP: ${this.getHP}`;
 
     this.gameObject.scene.time.delayedCall(500, () => {
       this.stateMachine.setState("idle");
@@ -71,6 +71,6 @@ export class HP implements IComponent {
   start() {}
 
   destroy() {
-    this.hpText.destroy();
+    // this.hpText.destroy();
   }
 }

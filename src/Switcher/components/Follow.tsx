@@ -1,11 +1,10 @@
 import Phaser, { Math as PMath } from "phaser";
+import { Entity } from "../Entities/Entity";
 import { IComponent, IComponentsService } from "../services/ComponentService";
 const { Between } = PMath.Angle;
 
 export class Follow implements IComponent {
-  private gameObject!:
-    | Phaser.GameObjects.GameObject
-    | Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  private gameObject!: Entity
   private target!: Phaser.GameObjects.GameObject;
 
   constructor(
@@ -15,7 +14,7 @@ export class Follow implements IComponent {
   }
 
   init(go: Phaser.GameObjects.GameObject) {
-    this.gameObject = go;
+    this.gameObject = go as Entity;
 
     const entity = this
       .gameObject as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -24,6 +23,7 @@ export class Follow implements IComponent {
   }
 
   followPlayer(dt: number) {
+    if(!this.gameObject.properties.grounded) return;
     const self = this
       .gameObject as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
     const target = this

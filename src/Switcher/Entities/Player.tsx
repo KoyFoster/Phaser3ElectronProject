@@ -26,7 +26,7 @@ export class Player extends Entity {
 
     // Set physics
     scene.physics.add.existing(this);
-    this.setDrag(0.0001);
+    this.setDrag(this.properties.drag);
     this.setDamping(true);
 
     // Add component
